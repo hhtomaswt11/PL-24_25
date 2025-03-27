@@ -1,0 +1,36 @@
+PROGRAM Fatorial
+PUSH "Introduza um número inteiro positivo:" # constante string
+PRINT
+PRINTLN
+READ
+STORE 0 # n
+PUSH 1 # constante inteira
+STORE 1 # fat
+PUSH 1 # constante inteira
+STORE 2 # i (inicial)
+LOAD 0 # n
+STORE 3 # valor final
+L0:
+LOAD 2 # i
+LOAD 3 # valor final
+GT # verifica se ultrapassou o valor final
+JNZ L1 # Sai do laço se ultrapassou o limite
+LOAD 1 # fat
+LOAD 2 # i
+MUL
+STORE 1 # fat
+LOAD 2 # i
+INC # incrementa
+STORE 2 # i (atualizado)
+JMP L0
+L1:
+PUSH "Fatorial de " # constante string
+PRINT
+LOAD 0 # n
+PRINT
+PUSH ": " # constante string
+PRINT
+LOAD 1 # fat
+PRINT
+PRINTLN
+HALT

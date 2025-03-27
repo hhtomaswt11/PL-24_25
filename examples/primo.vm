@@ -1,0 +1,61 @@
+PROGRAM NumeroPrimo
+PUSH "Introduza um número inteiro positivo:" # constante string
+PRINT
+PRINTLN
+READ
+STORE 0 # num
+LOAD 0 # num
+PUSH 2 # constante inteira
+LT
+JZ L0 # Se falso, pula para o false_label
+PUSH 0 # constante booleana
+STORE 1 # primo
+JMP L1
+L0:
+PUSH 1 # constante booleana
+STORE 1 # primo
+PUSH 2 # constante inteira
+STORE 2 # i
+L2:
+LOAD 2 # i
+LOAD 0 # num
+PUSH 2 # constante inteira
+IDIV
+LE
+LOAD 1 # primo
+AND
+JZ L3 # Se falso, pula para o fim do laço
+LOAD 0 # num
+LOAD 2 # i
+MOD
+PUSH 0 # constante inteira
+EQ
+JZ L4 # Se falso, pula para o false_label
+PUSH 0 # constante booleana
+STORE 1 # primo
+JMP L5
+L4:
+L5:
+LOAD 2 # i
+PUSH 1 # constante inteira
+ADD
+STORE 2 # i
+JMP L2
+L3:
+L1:
+LOAD 1 # primo
+JZ L6 # Se falso, pula para o false_label
+LOAD 0 # num
+PRINT
+PUSH " é um número primo" # constante string
+PRINT
+PRINTLN
+JMP L7
+L6:
+LOAD 0 # num
+PRINT
+PUSH " não é um número primo" # constante string
+PRINT
+PRINTLN
+L7:
+HALT

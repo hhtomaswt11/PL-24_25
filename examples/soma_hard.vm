@@ -1,0 +1,15 @@
+PROGRAM CalcularExpressaoComplexa
+PUSH 2
+PUSH 2
+PUSH 3
+MUL
+PUSH 2
+MUL
+ADD
+STORE 0 # resultado
+PUSH "O resultado de 2 + 2 * 3 * 2 é: "
+PRINT
+LOAD 0 # resultado
+PRINT
+PRINTLN
+HALT

@@ -1,0 +1,11 @@
+PROGRAM CalcularExpressao
+PUSH 2
+PUSH 2
+ADD
+STORE 0 # resultado
+PUSH "O resultado de 2 + 2 é: "
+PRINT
+LOAD 0 # resultado
+PRINT
+PRINTLN
+HALT
