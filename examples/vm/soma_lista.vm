@@ -1,0 +1,30 @@
+PROGRAM SomaArray
+PUSH 0
+STORE 0 # soma
+PUSH "Introduza 5 números inteiros:"
+PRINT
+PRINTLN
+PUSH 1
+STORE 1 # i (inicial)
+PUSH 5
+STORE 2 # valor final
+L0:
+LOAD 1 # i
+LOAD 2 # valor final
+GT # verifica se ultrapassou o valor final
+JNZ L1 # Sai do laço se ultrapassou o limite
+READ
+LOAD 0 # soma
+ADD
+STORE 0 # soma
+LOAD 1 # i
+INC # incrementa
+STORE 1 # i (atualizado)
+JMP L0
+L1:
+PUSH "A soma dos números é: "
+PRINT
+LOAD 0 # soma
+PRINT
+PRINTLN
+HALT

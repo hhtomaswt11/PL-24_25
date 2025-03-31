@@ -30,8 +30,20 @@ class VirtualMachine:
                 self.ip += 1
                 continue
 
-            parts = shlex.split(line) 
+            try:
+                parts = shlex.split(line)
+            except ValueError as e:
+                print(f"Erro de sintaxe na linha {self.ip + 1}, token '{line}'")
+                print(e)
+                self.running = False
+                return
+
+            if not parts:
+                self.ip += 1
+                continue
+
             instr = parts[0]
+
 
             if instr == "PUSH":
                 # print(parts[1]) -- "Hello, World!"

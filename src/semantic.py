@@ -46,8 +46,34 @@ class SemanticAnalyzer:
     def _analyze_var_declaration(self, node):
         id_list, type_node = node.children
         var_type = type_node.leaf
-        for var in id_list.children:
-            self.symtab.add_symbol(var.leaf, var_type, kind="variable")
+        
+
+        if var_type == "string_bounded":
+            str_len = type_node.children[0].leaf
+            for var in id_list.children:
+                self.symtab.add_symbol(var.leaf, type="string", kind="variable", size=int(str_len))
+        else:
+            for var in id_list.children:
+                if type_node.type == "array_type":
+                    # Pega informações do array
+                    range_node = type_node.children[0]
+                    base_type = type_node.children[1].leaf
+
+                    lower_bound = int(range_node.children[0].leaf)
+                    upper_bound = int(range_node.children[1].leaf)
+                    size = upper_bound - lower_bound + 1
+
+                    self.symtab.add_symbol(
+                        var.leaf,
+                        type="array",
+                        kind="variable",
+                        size=size,
+                        dimensions=(lower_bound, upper_bound),
+                        element_type=base_type
+                    )
+                else:
+                    self.symtab.add_symbol(var.leaf, var_type, kind="variable")
+
             
     def _analyze_function_decl(self, node):
         func_id = node.children[0].leaf
@@ -203,7 +229,7 @@ class SemanticAnalyzer:
             if index_type != 'integer':
                 self.errors.append(f"Erro: índice do array '{array_name}' deve ser inteiro")
 
-            return array_info.element_type  # ✅ Retorna 'integer' corretamente
+            return array_info.element_type  
 
                     
             

@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from colorama import init, Fore, Back, Style
+from colorama import init, Fore
 import sys
+import os
 from src.lexer import create_lexer
 from src.parser import create_parser
 from src.semantic import SemanticAnalyzer
 from src.codegen import CodeGenerator
 from vm import VirtualMachine
-from pprint import pprint
+
 init(autoreset=True)
 
 def main(pascal_file):
@@ -25,7 +26,7 @@ def main(pascal_file):
             print(" -", e)
         return
 
-    print("---Análise sintática concluída---")
+    print("--- Análise sintática concluída ---")
 
     # 3. Análise semântica
     analyzer = SemanticAnalyzer()
@@ -36,26 +37,24 @@ def main(pascal_file):
             print(" -", e)
         return
 
-    print("---Análise semântica concluída---")
+    print("--- Análise semântica concluída ---")
 
     # 4. Geração de código
     generator = CodeGenerator(analyzer.symtab)
     code = generator.generate(ast)
 
-    output_file = pascal_file.replace(".pas", ".vm")
+    # Preparar caminho de saída na pasta examples/vm/
+    filename = os.path.basename(pascal_file).replace(".pas", ".vm")
+    output_dir = os.path.join("examples", "vm")
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join(output_dir, filename)
+
+    # Guardar o código gerado
     with open(output_file, "w") as f:
         for line in code:
             f.write(line + "\n")
 
     print(f"\nCódigo gerado em: {output_file}")
-
-    
-    # print("\nCódigo a ser executado na VM...")
-    # print("---------------INÍCIO----------------")
-    # vm = VirtualMachine()
-    # vm.load_code(code)
-    # vm.run()
-    # print("----------------FIM------------------")
 
     print(Fore.CYAN + "\nCódigo a ser executado na VM...")
     print(Fore.GREEN + "{INICIO}")

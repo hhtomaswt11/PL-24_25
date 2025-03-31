@@ -1,0 +1,45 @@
+PROGRAM ListaDeStrings
+PUSH "Insira 5 nomes:"
+PRINT
+PRINTLN
+PUSH 1
+STORE 0 # i (inicial)
+PUSH 5
+STORE 1 # valor final
+L0:
+LOAD 0 # i
+LOAD 1 # valor final
+GT # verifica se ultrapassou o valor final
+JNZ L1 # Sai do laço se ultrapassou o limite
+READ
+LOAD 0 # i
+INC # incrementa
+STORE 0 # i (atualizado)
+JMP L0
+L1:
+PUSH "Nomes inseridos:"
+PRINT
+PRINTLN
+PUSH 1
+STORE 0 # i (inicial)
+PUSH 5
+STORE 2 # valor final
+L2:
+LOAD 0 # i
+LOAD 2 # valor final
+GT # verifica se ultrapassou o valor final
+JNZ L3 # Sai do laço se ultrapassou o limite
+PUSH "Nome "
+PRINT
+LOAD 0 # i
+PRINT
+PUSH ": "
+PRINT
+PRINT
+PRINTLN
+LOAD 0 # i
+INC # incrementa
+STORE 0 # i (atualizado)
+JMP L2
+L3:
+HALT

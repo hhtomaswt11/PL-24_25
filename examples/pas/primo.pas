@@ -1,6 +1,6 @@
 program NumeroPrimo;
 var
-    num, i: integer;
+    num, i:integer;
     primo: boolean;
 begin
     writeln('Introduza um número inteiro positivo:');

@@ -150,19 +150,37 @@ class PascalParser:
             p[0] = ASTNode('id_list', [ASTNode('id', leaf=p[1])])
     
     # Regra para especificação de tipos
+    # def p_type_spec(self, p):
+    #     '''type_spec : INTEGER_TYPE
+    #                  | REAL_TYPE
+    #                  | BOOLEAN
+    #                  | STRING_TYPE
+    #                  | CHAR_TYPE
+    #                  | array_type'''
+    #     if len(p) == 2:
+    #         if isinstance(p[1], ASTNode):  # Se for um array_type
+    #             p[0] = p[1]
+    #         else:
+    #             p[0] = ASTNode('type', leaf=p[1])
+    
     def p_type_spec(self, p):
         '''type_spec : INTEGER_TYPE
-                     | REAL_TYPE
-                     | BOOLEAN
-                     | STRING_TYPE
-                     | CHAR_TYPE
-                     | array_type'''
+                    | REAL_TYPE
+                    | BOOLEAN
+                    | STRING_TYPE
+                    | CHAR_TYPE
+                    | STRING_TYPE LBRACKET INTEGER RBRACKET
+                    | array_type'''
         if len(p) == 2:
-            if isinstance(p[1], ASTNode):  # Se for um array_type
+            if isinstance(p[1], ASTNode):  # array_type
                 p[0] = p[1]
             else:
                 p[0] = ASTNode('type', leaf=p[1])
-    
+        elif len(p) == 5:
+            # string[50]
+            p[0] = ASTNode('type', [ASTNode('integer', leaf=p[3])], leaf='string_bounded')
+
+        
     # Regra para tipos de array
     def p_array_type(self, p):
         '''array_type : ARRAY LBRACKET INTEGER PERIOD PERIOD INTEGER RBRACKET OF type_spec'''
@@ -247,11 +265,14 @@ class PascalParser:
     # Regra para chamada de procedimento
     def p_procedure_call_statement(self, p):
         '''procedure_call_statement : ID LPAREN expression_list RPAREN
-                                   | ID LPAREN RPAREN
-                                   | WRITELN LPAREN expression_list RPAREN
-                                   | WRITELN LPAREN RPAREN
-                                   | READLN LPAREN variable RPAREN
-                                   | READLN LPAREN RPAREN'''
+                            | ID LPAREN RPAREN
+                            | WRITELN LPAREN expression_list RPAREN
+                            | WRITELN LPAREN RPAREN
+                            | WRITE LPAREN expression_list RPAREN
+                            | WRITE LPAREN RPAREN
+                            | READLN LPAREN variable RPAREN
+                            | READLN LPAREN RPAREN'''
+
         if p[1].lower() in ('writeln', 'readln'):
             if len(p) > 4:
                 if p[1].lower() == 'writeln':
@@ -260,12 +281,19 @@ class PascalParser:
                     p[0] = ASTNode('readln', [p[3]])
             else:
                 p[0] = ASTNode(p[1].lower(), [])
+                
+                
         else:
             if len(p) > 4:
-                p[0] = ASTNode('procedure_call', [ASTNode('id', leaf=p[1]), p[3]])
+                if p[1].lower() == 'write':
+                    p[0] = ASTNode('write', [p[3]])
+                else:
+                    p[0] = ASTNode('procedure_call', [ASTNode('id', leaf=p[1]), p[3]])
             else:
-                p[0] = ASTNode('procedure_call', [ASTNode('id', leaf=p[1])])
-    
+                if p[1].lower() == 'write':
+                    p[0] = ASTNode('write', [])
+                else:
+                    p[0] = ASTNode('procedure_call', [ASTNode('id', leaf=p[1])])
 
 
     # Regra para lista de expressões

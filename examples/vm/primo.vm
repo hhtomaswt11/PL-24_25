@@ -1,25 +1,25 @@
 PROGRAM NumeroPrimo
-PUSH "Introduza um número inteiro positivo:" # constante string
+PUSH "Introduza um número inteiro positivo:"
 PRINT
 PRINTLN
 READ
 STORE 0 # num
 LOAD 0 # num
-PUSH 2 # constante inteira
+PUSH 2
 LT
 JZ L0 # Se falso, pula para o false_label
-PUSH 0 # constante booleana
+PUSH 0
 STORE 1 # primo
 JMP L1
 L0:
-PUSH 1 # constante booleana
+PUSH 1
 STORE 1 # primo
-PUSH 2 # constante inteira
+PUSH 2
 STORE 2 # i
 L2:
 LOAD 2 # i
 LOAD 0 # num
-PUSH 2 # constante inteira
+PUSH 2
 IDIV
 LE
 LOAD 1 # primo
@@ -28,16 +28,16 @@ JZ L3 # Se falso, pula para o fim do laço
 LOAD 0 # num
 LOAD 2 # i
 MOD
-PUSH 0 # constante inteira
+PUSH 0
 EQ
 JZ L4 # Se falso, pula para o false_label
-PUSH 0 # constante booleana
+PUSH 0
 STORE 1 # primo
 JMP L5
 L4:
 L5:
 LOAD 2 # i
-PUSH 1 # constante inteira
+PUSH 1
 ADD
 STORE 2 # i
 JMP L2
@@ -47,14 +47,14 @@ LOAD 1 # primo
 JZ L6 # Se falso, pula para o false_label
 LOAD 0 # num
 PRINT
-PUSH " é um número primo" # constante string
+PUSH " é um número primo"
 PRINT
 PRINTLN
 JMP L7
 L6:
 LOAD 0 # num
 PRINT
-PUSH " não é um número primo" # constante string
+PUSH " não é um número primo"
 PRINT
 PRINTLN
 L7:
