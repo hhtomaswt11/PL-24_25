@@ -1,0 +1,21 @@
+// inicio declaracao da variavel "resultado"
+pushi 0
+storeg 0
+// fim declaracao da variavel "resultado"
+start
+pushi 4
+pushi 2
+pushi 3
+mul
+add
+pushi 2
+pushi 2
+div
+sub
+storeg 0
+pushs "O resultado de 4 + 2 * 3 - 2 / 2 é: "
+writes
+pushg 0
+writei
+writeln
+stop

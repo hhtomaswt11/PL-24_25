@@ -1,5 +1,0 @@
-PROGRAM HelloWorld
-PUSH "Hello, World!"
-PRINT
-PRINTLN
-HALT

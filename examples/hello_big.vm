@@ -1,5 +1,0 @@
-PROGRAM HelloWorld
-PUSH "Hello, World! This is a Pascal compiler!!!" # constante string
-PRINT
-PRINTLN
-HALT

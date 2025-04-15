@@ -1,7 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-import ply.lex as lex
+import ply.lex as lex, sys 
 
 class PascalLexer:
     """
@@ -86,6 +83,7 @@ class PascalLexer:
         'readln': 'READLN',
         'write': 'WRITE',
         'read': 'READ',
+        'halt': 'HALT',
     }
     
     # Adiciona as palavras-chave à lista de tokens
@@ -111,14 +109,14 @@ class PascalLexer:
     t_LE = r'<='
     t_GE = r'>='
     t_APOSTROPHE = r'\''
-    
+
     # Regra para o operador de atribuição (:=)
     def t_ASSIGN(self, t):
         r':='
         return t
     
     # Regra para identificadores
-    def t_ID(self, t):
+    def t_ID(self, t): # Para poder diferenciar qual string recebe 
         r'[a-zA-Z][a-zA-Z0-9_]*'
         # Verifica se é uma palavra-chave
         t.type = self.reserved.get(t.value.lower(), 'ID')
@@ -140,7 +138,6 @@ class PascalLexer:
     def t_STRING(self, t):
         r"'[^']*'"
         t.value = t.value[1:-1]  # remove as aspas
-        #print(f"debug: string capturada: {repr(t.value)}")  
         return t
 
     
@@ -169,12 +166,12 @@ class PascalLexer:
         return self.lexer
     
     # Análise de uma entrada
-    def test(self, data):
-        self.lexer.input(data)
-        tokens = []
-        for tok in self.lexer:
-            tokens.append(tok)
-        return tokens
+    # def test(self, data):
+    #     self.lexer.input(data)
+    #     tokens = []
+    #     for tok in self.lexer:
+    #         tokens.append(tok)
+    #     return tokens
     
     # Reinicializa o lexer
     def reset(self):
@@ -187,18 +184,3 @@ def create_lexer():
     return lexer.build()
 
 
-if __name__ == "__main__":
-    # Teste básico
-    data = """
-    program HelloWorld;
-    begin
-        writeln('Ola, Mundo!');
-    end.
-    """
-    
-    lexer = create_lexer()
-    lexer.input(data)
-    
-    # Imprimir os tokens
-    for tok in lexer:
-        print(tok)

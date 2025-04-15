@@ -5,6 +5,12 @@ var
 begin
     writeln('Introduza um número inteiro positivo:');
     readln(num);
+    
+    if num < 0 then
+    	begin
+    	writeln('Não existem números primos negativos.');
+    	halt;
+    	end;
 
     if num < 2 then
         primo := false
@@ -19,6 +25,7 @@ begin
             i := i + 1;
         end;
     end;
+    
 
     if primo then
         writeln(num, ' é um número primo')

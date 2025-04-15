@@ -1,0 +1,29 @@
+// inicio declaracao da variavel "celsius"
+pushi 0
+storeg 0
+// fim declaracao da variavel "celsius"
+// inicio declaracao da variavel "fahrenheit"
+pushi 0
+storeg 1
+// fim declaracao da variavel "fahrenheit"
+start
+pushs "Introduza a temperatura em Celsius:"
+writes
+writeln
+read
+atoi
+storeg 0
+pushg 0
+pushi 9
+mul
+pushi 5
+div
+pushi 32
+add
+storeg 1
+pushs "Temperatura em Fahrenheit: "
+writes
+pushg 1
+writei
+writeln
+stop

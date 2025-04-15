@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 import ply.yacc as yacc
 from src.lexer import PascalLexer, create_lexer
 from src.symboltable import SymbolTable
@@ -8,9 +5,9 @@ from src.symboltable import SymbolTable
 class ASTNode:
     """Classe base para nós da Árvore Sintática Abstrata (AST)."""
     def __init__(self, type, children=None, leaf=None):
-        self.type = type            # Tipo do nó
-        self.children = children if children else []  # Filhos do nó
-        self.leaf = leaf            # Valor da folha, se for uma folha
+        self.type = type            # Tipo do nó - integer, binary_op, etc 
+        self.children = children if children else []  # Filhos do nó - operandos de uma operação, etc
+        self.leaf = leaf            # Valor da folha, se for uma folha - valor literal 'x' '2' '4', etc
     
     def __repr__(self):
         return f"{self.type}({self.leaf if self.leaf is not None else ''})"
@@ -37,6 +34,8 @@ class PascalParser:
         
         # Inicializa o parser
         self.parser = yacc.yacc(module=self)
+        
+    # Definem regras gramaticais.
     
     # Regra para a unidade de programa completa
     def p_program(self, p):
@@ -47,7 +46,17 @@ class PascalParser:
     def p_block(self, p):
         '''block : declarations compound_statement'''
         p[0] = ASTNode('block', [p[1], p[2]])
-        
+
+    def p_declarations(self, p):
+        '''declarations : VAR var_declarations
+                        | function_declaration
+                        | empty'''
+        if len(p) == 3:
+            p[0] = ASTNode('declarations', [p[2]])
+        elif p[1] is not None:
+            p[0] = ASTNode('declarations', [p[1]])
+        else:
+            p[0] = ASTNode('declarations')
         
     def p_function_block(self, p):
         '''function_block : VAR var_declarations compound_statement
@@ -59,64 +68,11 @@ class PascalParser:
             # só begin...end
             p[0] = ASTNode('block', [ASTNode('declarations'), p[1]])
 
-        
-    # # Regra para declarações (variáveis, constantes, etc.)
-    # def p_declarations(self, p):
-    #     '''declarations : VAR var_declarations
-    #                     | empty'''
-    #     if len(p) > 2:
-    #         p[0] = ASTNode('declarations', [p[2]])
-    #     else:
-    #         p[0] = ASTNode('declarations', [p[1]])
-    # def p_declarations(self, p):
-    #     '''declarations : VAR var_declarations
-    #                     | function_declaration
-    #                     | empty'''
-    #     if len(p) == 3:
-    #         p[0] = ASTNode('declarations', [p[2]])
-    #     elif p[1] != None:
-    #         p[0] = ASTNode('declarations', [p[1]])
-    #     else:
-    #         p[0] = ASTNode('declarations')
-    
-    # def p_declarations(self, p):
-    #     '''declarations : declarations function_declaration
-    #                     | declarations var_declarations
-    #                     | function_declaration
-    #                     | var_declarations
-    #                     | empty'''
-    #     if len(p) > 2:
-    #         p[1].children.append(p[2])
-    #         p[0] = p[1]
-    #     else:
-    #         p[0] = ASTNode('declarations', [p[1]])
-    # def p_declarations(self, p):
-    #     '''declarations : declarations declaration
-    #                     | declaration'''
-    #     if len(p) == 3:
-    #         p[1].children.append(p[2])
-    #         p[0] = p[1]
-    #     else:
-    #         p[0] = ASTNode('declarations', [p[1]])
-    
-    def p_declarations(self, p):
-        '''declarations : VAR var_declarations
-                        | function_declaration
-                        | empty'''
-        if len(p) == 3:
-            p[0] = ASTNode('declarations', [p[2]])
-        elif p[1] is not None:
-            p[0] = ASTNode('declarations', [p[1]])
-        else:
-            p[0] = ASTNode('declarations')
-
 
     def p_declaration(self, p):
         '''declaration : VAR var_declarations
                     | function_declaration'''
         p[0] = p[2] if p[1].lower() == 'var' else p[1]
-
-
 
     
     # Regra para declarações de variáveis
@@ -195,6 +151,7 @@ class PascalParser:
                      | while_statement
                      | for_statement
                      | procedure_call_statement
+                     | halt_statement
                      | empty'''
         p[0] = p[1]
     
@@ -203,15 +160,6 @@ class PascalParser:
         '''assignment_statement : variable ASSIGN expression'''
         p[0] = ASTNode('assignment', [p[1], p[3]])
     
-    # Regra para variáveis (identificadores ou elementos de array)
-    # def p_variable(self, p):
-    #     '''variable : ID
-    #                | ID LBRACKET expression RBRACKET'''
-    #     if len(p) > 2:
-    #         p[0] = ASTNode('array_element', [ASTNode('id', leaf=p[1]), p[3]])
-    #     else:
-    #         p[0] = ASTNode('variable', leaf=p[1])
-    
     def p_variable(self, p):
         '''variable : ID
                 | ID LBRACKET expression RBRACKET'''
@@ -219,7 +167,11 @@ class PascalParser:
             p[0] = ASTNode('array_access', [p[3]], leaf=p[1])
         else:
             p[0] = ASTNode('variable', leaf=p[1])
-
+            
+    # Regra para comando halt
+    def p_halt_statement(self, p):
+        '''halt_statement : HALT SEMICOLON'''
+        p[0] = ASTNode('halt')
 
     # Regra para comando if-then-else
     def p_if_statement(self, p):
@@ -234,8 +186,6 @@ class PascalParser:
     def p_while_statement(self, p):
         '''while_statement : WHILE expression DO statement'''
         p[0] = ASTNode('while', [p[2], p[4]])
-    
-
 
     # Regra para comando for
     def p_for_statement(self, p):
@@ -266,17 +216,6 @@ class PascalParser:
             else:
                 p[0] = ASTNode('procedure_call', [ASTNode('id', leaf=p[1])])
     
-
-
-    # Regra para lista de expressões
-    # def p_expression_list(self, p):
-    #     '''expression_list : expression_list COMMA expression
-    #                      | expression'''
-    #     if len(p) > 2:
-    #         p[1].children.append(p[3])
-    #         p[0] = p[1]
-    #     else:
-    #         p[0] = ASTNode('expression_list', [p[1]])
     def p_expression_list(self, p):
         '''expression_list : expression_list COMMA expression
                        | expression'''
@@ -285,8 +224,6 @@ class PascalParser:
               p[0] = p[1]
         else:
              p[0] = ASTNode('expression_list', [p[1]])
-        # DEBUG:
-        # print("expression_list node:", p[0])
 
 
 
@@ -380,9 +317,7 @@ class PascalParser:
         else:
             p[0] = ASTNode('function_call', [ASTNode('id', leaf=p[1])])
     
-    # def p_function_declaration(self, p):
-    #     '''function_declaration : FUNCTION ID LPAREN param_list RPAREN COLON type_spec SEMICOLON block SEMICOLON'''
-    #     p[0] = ASTNode('function_decl', [ASTNode('id', leaf=p[2]), p[4], p[7], p[9]])
+
     def p_function_declaration(self, p):
         '''function_declaration : FUNCTION ID LPAREN param_list RPAREN COLON type_spec SEMICOLON function_block SEMICOLON'''
         p[0] = ASTNode('function_decl', [ASTNode('id', leaf=p[2]), p[4], p[7], p[9]])
@@ -400,9 +335,6 @@ class PascalParser:
     def p_param(self, p):
         '''param : id_list COLON type_spec'''
         p[0] = ASTNode('param', [p[1], p[3]])
-
-
-
 
     # Regra para produções vazias
     def p_empty(self, p):
@@ -430,20 +362,4 @@ def create_parser():
     return PascalParser()
 
 
-# if __name__ == "__main__":
-#     data = """
-#     program HelloWorld;
-#     begin
-#         writeln('Ola, Mundo!');
-#     end.
-#     """
-    
-#     parser = create_parser()
-#     ast = parser.parse(data)
-    
-#     if ast:
-#         print("Análise sintática bem-sucedida!")
-#     else:
-#         print("Erros na análise sintática:")
-#         for error in parser.errors:
-#             print(f"  - {error}")
+

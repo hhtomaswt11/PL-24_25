@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 from src.symboltable import SymbolTable
 
 class SemanticAnalyzer:
@@ -46,8 +43,34 @@ class SemanticAnalyzer:
     def _analyze_var_declaration(self, node):
         id_list, type_node = node.children
         var_type = type_node.leaf
-        for var in id_list.children:
-            self.symtab.add_symbol(var.leaf, var_type, kind="variable")
+        
+
+        if var_type == "string_bounded":
+            str_len = type_node.children[0].leaf
+            for var in id_list.children:
+                self.symtab.add_symbol(var.leaf, type="string", kind="variable", size=int(str_len))
+        else:
+            for var in id_list.children:
+                if type_node.type == "array_type":
+                    # Pega informações do array
+                    range_node = type_node.children[0]
+                    base_type = type_node.children[1].leaf
+
+                    lower_bound = int(range_node.children[0].leaf)
+                    upper_bound = int(range_node.children[1].leaf)
+                    size = upper_bound - lower_bound + 1
+
+                    self.symtab.add_symbol(
+                        var.leaf,
+                        type="array",
+                        kind="variable",
+                        size=size,
+                        dimensions=(lower_bound, upper_bound),
+                        element_type=base_type
+                    )
+                else:
+                    self.symtab.add_symbol(var.leaf, var_type, kind="variable")
+
             
     def _analyze_function_decl(self, node):
         func_id = node.children[0].leaf
@@ -120,15 +143,6 @@ class SemanticAnalyzer:
         for var_node in node.children:
             if self.symtab.lookup(var_node.leaf) is None:
                 self.errors.append(f"Erro: variável '{var_node.leaf}' não declarada")
-
-    # def _analyze_binary_op(self, node):
-    #     left_type = self._get_expression_type(node.children[0])
-    #     right_type = self._get_expression_type(node.children[1])
-    #     if left_type != right_type:
-    #         self.errors.append("Erro: operação binária com tipos incompatíveis")
-    #     return left_type
-    
-    
     
     def _analyze_binary_op(self, node):
         left_type = self._get_expression_type(node.children[0])
@@ -152,16 +166,14 @@ class SemanticAnalyzer:
             return 'integer'
 
         elif op == '/':
-            if left_type != 'integer' or right_type != 'integer':
-                self.errors.append("Erro: operação '/' requer inteiros")
+            if left_type not in ['integer', 'real'] or right_type not in ['integer', 'real']:
+                self.errors.append("Erro: operação '/' requer números (inteiros ou reais)")
             return 'real'
+
 
         else:
             self.errors.append(f"Erro: operador binário desconhecido '{op}'")
             return None
-
-
-
 
     def _analyze_unary_op(self, node):
         return self._get_expression_type(node.children[0])
@@ -203,15 +215,8 @@ class SemanticAnalyzer:
             if index_type != 'integer':
                 self.errors.append(f"Erro: índice do array '{array_name}' deve ser inteiro")
 
-            return array_info.element_type  # ✅ Retorna 'integer' corretamente
+            return array_info.element_type  
 
-                    
-            
-            
-            index_type = self._get_expression_type(node.children[0])
-            if index_type != 'integer':
-                self.errors.append(f"Erro: índice do array '{array_name}' deve ser inteiro")
-            return array_info['element_type']
         elif node.type in ['binary_op', 'unary_op']:
             return self._analyze_node(node)
         return None

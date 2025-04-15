@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 class Symbol:
     """
     Classe que representa um símbolo na tabela de símbolos.
@@ -47,44 +44,7 @@ class SymbolTable:
             self.scope_names.pop()
             self.current_scope -= 1
         return self.current_scope
-    
-    # def add_symbol(self, name, type=None, value=None, kind=None, params=None, address=None, size=1, dimensions=None, element_type=None):
-    #     """Adiciona um símbolo no escopo atual."""
-    #     scope_name = self.scope_names[self.current_scope]
-    #     symbol = Symbol(name, type, value, kind, params, scope_name, address)
-    #     symbol.size = size
-    #     symbol.dimensions = dimensions
-    #     symbol.element_type = element_type
-    #     self.scopes[self.current_scope][name] = symbol
-    #     return symbol
-    # def add_symbol(self, name, type=None, value=None, kind=None, params=None, address=None, size=1, dimensions=None, element_type=None):
-    #     """Adiciona um símbolo no escopo atual."""
-    #     scope_name = self.scope_names[self.current_scope]
-    #     symbol = Symbol(name, type, value, kind, params, scope_name, address)
-        
-    #     # Se for um array, define propriedades extras
-    #     if type == "array":
-    #         symbol.size = size
-    #         symbol.dimensions = dimensions
-    #         symbol.element_type = element_type  # Ex: integer
 
-    #     self.scopes[self.current_scope][name] = symbol
-    #     return symbol
-    # def add_symbol(self, name, type=None, value=None, kind=None, params=None, address=None, size=1, dimensions=None, element_type=None):
-    #     """Adiciona um símbolo no escopo atual."""
-    #     scope_name = self.scope_names[self.current_scope]
-        
-    #     # Se for um array, define propriedades específicas
-    #     if type == "array":
-    #         symbol = Symbol(name, type="array", value=value, kind=kind, params=params, scope=scope_name, address=address)
-    #         symbol.size = size
-    #         symbol.dimensions = dimensions
-    #         symbol.element_type = element_type  # Ex: integer
-    #     else:
-    #         symbol = Symbol(name, type=type, value=value, kind=kind, params=params, scope=scope_name, address=address)
-
-    #     self.scopes[self.current_scope][name] = symbol
-    #     return symbol
     def add_symbol(self, name, type=None, value=None, kind=None, params=None, address=None, size=1, dimensions=None, element_type=None):
         """Adiciona um símbolo na tabela de símbolos, incluindo suporte para arrays."""
         scope_name = self.scope_names[self.current_scope]
