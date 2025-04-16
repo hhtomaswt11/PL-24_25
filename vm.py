@@ -62,6 +62,9 @@ class VirtualMachine:
                     self.stack.append(a * b)
                 case "div":
                     b, a = self.stack.pop(), self.stack.pop()
+                    self.stack.append(a // b)
+                case "fdiv":
+                    b, a = self.stack.pop(), self.stack.pop()
                     self.stack.append(a / b)
                 case "mod":
                     b, a = self.stack.pop(), self.stack.pop()

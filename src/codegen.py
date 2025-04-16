@@ -71,13 +71,12 @@ class CodeGenerator:
                 if symbol.address is None:
                     symbol.address = self.current_offset
                     self.current_offset += 1
-
                 # Gerar declaração da variável
-                comment = f"// inicio declaracao da variavel \"{var_name}\""
-                self.var_declarations.append(comment)
+                #comment = f"// inicio declaracao da variavel \"{var_name}\""
+                #self.var_declarations.append(comment)
                 self.var_declarations.append(f"pushi 0")
                 self.var_declarations.append(f"storeg {symbol.address}")
-                self.var_declarations.append(f"// fim declaracao da variavel \"{var_name}\"")
+                #self.var_declarations.append(f"// fim declaracao da variavel \"{var_name}\"")
 
     def _generate_statement_list(self, node):
         for stmt in node.children:
@@ -103,7 +102,6 @@ class CodeGenerator:
     def _generate_real(self, node):
         self.emit(f"pushf {node.leaf}")
 
-
     def _generate_string(self, node):
         self.emit(f"pushs \"{node.leaf}\"")
 
@@ -123,6 +121,8 @@ class CodeGenerator:
             self.emit("mul")
         elif op == 'div':
             self.emit("div")
+        elif op == '/':
+            self.emit("fdiv")
         elif op == 'mod':
             self.emit("mod")
         elif op == '=':

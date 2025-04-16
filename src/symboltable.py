@@ -101,34 +101,34 @@ class SymbolTable:
         return all_symbols
 
 
-if __name__ == "__main__":
-    # Teste da tabela de símbolos
-    symtab = SymbolTable()
+# if __name__ == "__main__":
+#     # Teste da tabela de símbolos
+#     symtab = SymbolTable()
     
-    # Adiciona símbolos ao escopo global
-    symtab.add_symbol("x", "integer", kind="variable")
-    symtab.add_symbol("y", "real", kind="variable")
+#     # Adiciona símbolos ao escopo global
+#     symtab.add_symbol("x", "integer", kind="variable")
+#     symtab.add_symbol("y", "real", kind="variable")
     
-    # Adiciona um array
-    symtab.add_symbol("numeros", type="array", kind="variable", size=5, dimensions=(1, 5), element_type="integer")
-    print(symtab.lookup("numeros"))  # Deve mostrar um objeto com element_type='integer'
+#     # Adiciona um array
+#     symtab.add_symbol("numeros", type="array", kind="variable", size=5, dimensions=(1, 5), element_type="integer")
+#     print(symtab.lookup("numeros"))  # Deve mostrar um objeto com element_type='integer'
 
     
-    # Cria um novo escopo para uma função
-    symtab.enter_scope("func1")
-    symtab.add_symbol("a", "integer", kind="parameter")
-    symtab.add_symbol("result", "integer", kind="variable")
+#     # Cria um novo escopo para uma função
+#     symtab.enter_scope("func1")
+#     symtab.add_symbol("a", "integer", kind="parameter")
+#     symtab.add_symbol("result", "integer", kind="variable")
     
-    # Testa lookup
-    print(symtab.lookup("a"))  # Deve encontrar no escopo atual
-    print(symtab.lookup("x"))  # Deve encontrar no escopo global
-    print(symtab.lookup("z"))  # Não deve encontrar (None)
+#     # Testa lookup
+#     print(symtab.lookup("a"))  # Deve encontrar no escopo atual
+#     print(symtab.lookup("x"))  # Deve encontrar no escopo global
+#     print(symtab.lookup("z"))  # Não deve encontrar (None)
     
-    # Sai do escopo da função
-    symtab.exit_scope()
+#     # Sai do escopo da função
+#     symtab.exit_scope()
     
-    # Deve retornar None porque 'a' está no escopo da função
-    print(symtab.lookup("a"))
+#     # Deve retornar None porque 'a' está no escopo da função
+#     print(symtab.lookup("a"))
     
-    # Testar se o array está com as propriedades certas
-    print(symtab.lookup("numeros"))
+#     # Testar se o array está com as propriedades certas
+#     print(symtab.lookup("numeros"))

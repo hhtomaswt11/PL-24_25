@@ -160,15 +160,30 @@ class SemanticAnalyzer:
                 self.errors.append("Erro: operador lógico com operandos não booleanos")
             return 'boolean'
 
-        elif op in ['+', '-', '*', 'div', 'mod']:
-            if left_type != 'integer' or right_type != 'integer':
-                self.errors.append("Erro: operação aritmética com tipos não inteiros")
-            return 'integer'
+        # elif op in ['+', '-', '*', 'div', 'mod']:
+        #     if left_type != 'integer' or right_type != 'integer':
+        #         self.errors.append("Erro: operação aritmética com tipos não inteiros")
+        #     return 'integer'
+        
+        elif op in ['+', '-', '*', 'div', 'mod', '/']:
+            if op in ['div', 'mod']:
+                if left_type != 'integer' or right_type != 'integer':
+                    self.errors.append("Erro: operação 'div' ou 'mod' requer operandos do tipo inteiro")
+                return 'integer'
+            else:
+                if left_type not in ['integer', 'real'] or right_type not in ['integer', 'real']:
+                    self.errors.append("Erro: operação aritmética requer operandos do tipo inteiro ou real")
+                # Se algum dos dois é real, o resultado é real; caso contrário, é inteiro
+                if left_type == 'real' or right_type == 'real':
+                    return 'real'
+                else:
+                    return 'integer'
 
-        elif op == '/':
-            if left_type not in ['integer', 'real'] or right_type not in ['integer', 'real']:
-                self.errors.append("Erro: operação '/' requer números (inteiros ou reais)")
-            return 'real'
+
+        # elif op == '/':
+        #     if left_type not in ['integer', 'real'] or right_type not in ['integer', 'real']:
+        #         self.errors.append("Erro: operação '/' requer números (inteiros ou reais)")
+        #     return 'real'
 
 
         else:

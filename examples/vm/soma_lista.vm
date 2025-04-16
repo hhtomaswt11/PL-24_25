@@ -1,15 +1,9 @@
-// inicio declaracao da variavel "numeros"
 pushi 0
 storeg 0
-// fim declaracao da variavel "numeros"
-// inicio declaracao da variavel "i"
 pushi 0
 storeg 1
-// fim declaracao da variavel "i"
-// inicio declaracao da variavel "soma"
 pushi 0
 storeg 2
-// fim declaracao da variavel "soma"
 pushi 0
 storeg 3
 start
@@ -20,13 +14,16 @@ writes
 writeln
 pushi 1
 storeg 1
-pushi 5
+pushi 4
 storeg 3
 FOR1:
 pushg 1
 pushg 3
 sup
 jnz ENDFOR0
+read
+atoi
+storeg 2
 pushg 2
 pushg 1
 add

@@ -33,7 +33,7 @@ class PascalParser:
         self.errors = []
         
         # Inicializa o parser
-        self.parser = yacc.yacc(module=self)
+        self.parser = yacc.yacc(module=self) # Cria o parser ao compilar as regras p_ 
         
     # Definem regras gramaticais.
     
@@ -351,10 +351,20 @@ class PascalParser:
             self.errors.append("Erro de sintaxe: fim inesperado do arquivo")
             print("Erro de sintaxe: fim inesperado do arquivo")
     
+    
+    
+    
+    
     # Método para analisar uma string
     def parse(self, data):
         self.errors = []
-        return self.parser.parse(data, lexer=self.lexer)
+        return self.parser.parse(data, lexer=self.lexer) # Inicia a análise léxica e sintática ao mesmo tempo
+    # O texto é entregue ao lexer, que transforma em TOKENS com base nas regras t_
+    # Com base nos tokens, o parser tenta casa-los com alguma regra p_. Se casar, a árvore AST começa a ser construída. 
+    # Cada regra retorna um ASTNode, atribuindo-o a p[0]
+    # No fim da analise, o valor de p[0] na regra inicial p_program é o que é retornado
+    # É aplicada uma análise semantica sobre a AST, recursivamente 
+    # Retorna a AST 
 
 
 # Função para criar uma instância do parser

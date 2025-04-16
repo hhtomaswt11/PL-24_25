@@ -1,6 +1,6 @@
 program Soma;
 var
-  a, b, c: integer;
+  a, b, c: real;
 begin
   readln(a);
   readln(b);
