@@ -1,6 +1,7 @@
 program CelsiusParaFahrenheit;
 var
-  celsius, fahrenheit: integer;  {TENTAR INCLUIR COM REAL}
+  celsius: integer;
+  fahrenheit: integer;  {TENTAR INCLUIR COM REAL}
 begin
   writeln('Introduza a temperatura em Celsius:');
   readln(celsius);

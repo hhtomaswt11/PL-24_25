@@ -157,7 +157,7 @@ class PascalLexer:
     
     # Tratamento de erros
     def t_error(self, t):
-        print(f"Caracter ilegal '{t.value[0]}' na linha {t.lexer.lineno}")
+        print(f"Caractere ilegal '{t.value[0]}' na linha {t.lexer.lineno}")
         t.lexer.skip(1)
     
     # Construção do lexer

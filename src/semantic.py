@@ -104,9 +104,13 @@ class SemanticAnalyzer:
 
     def _analyze_assignment(self, node):
         var_node = node.children[0]
+        print(var_node)
         expr_node = node.children[1]
+        print(expr_node)
         var_type = self._get_expression_type(var_node)
+        print(var_type)
         expr_type = self._get_expression_type(expr_node)
+        print(expr_type)
         if var_type and expr_type and var_type != expr_type:
             self.errors.append(f"Erro de tipo: não pode atribuir '{expr_type}' a '{var_type}'")
 
@@ -165,19 +169,79 @@ class SemanticAnalyzer:
         #         self.errors.append("Erro: operação aritmética com tipos não inteiros")
         #     return 'integer'
         
+        
+        # elif op in ['+', '-', '*', 'div', 'mod', '/']: # OK 
+        #     if op in ['div', 'mod']:
+        #         if left_type != 'integer' or right_type != 'integer':
+        #             self.errors.append("Erro: operação 'div' ou 'mod' requer operandos do tipo inteiro")
+        #         return 'integer'
+        #     else:
+        #         if op == '/':
+        #             if left_type not in ['integer', 'real'] or right_type not in ['integer', 'real']:
+        #                 self.errors.append("Erro: operação '/' requer operandos do tipo inteiro ou real")
+        #             #return 'real'
+        #             if left_type == 'real' or right_type == 'real':
+        #                 return 'real'
+        #             else:
+        #                 return 'integer'
+        
+        
         elif op in ['+', '-', '*', 'div', 'mod', '/']:
             if op in ['div', 'mod']:
                 if left_type != 'integer' or right_type != 'integer':
                     self.errors.append("Erro: operação 'div' ou 'mod' requer operandos do tipo inteiro")
                 return 'integer'
+            elif op == '/':
+                if left_type not in ['integer', 'real'] or right_type not in ['integer', 'real']:
+                    self.errors.append("Erro: operação '/' requer operandos do tipo inteiro ou real")
+                #return 'real'  # <--- Força o tipo real ?????? 
+                if left_type == 'real' or right_type == 'real':
+                        return 'real'
+                else:
+                        return 'integer'
+                    
+                    
             else:
                 if left_type not in ['integer', 'real'] or right_type not in ['integer', 'real']:
                     self.errors.append("Erro: operação aritmética requer operandos do tipo inteiro ou real")
-                # Se algum dos dois é real, o resultado é real; caso contrário, é inteiro
                 if left_type == 'real' or right_type == 'real':
                     return 'real'
                 else:
                     return 'integer'
+
+                
+                # else: # OK 
+                #     if left_type not in ['integer','real'] or right_type not in ['integer', 'real']:
+                #         self.errors.append("Erro: operação aritmética requer operandos do tipo inteiro ou real")
+                #     if left_type == 'real' or right_type == 'real':
+                #         return 'real'
+                #     else:
+                #         return 'integer'
+                    
+                    
+                
+                # if left_type not in ['integer', 'real'] or right_type not in ['integer', 'real']:
+                #     self.errors.append("Erro: operação aritmética requer operandos do tipo inteiro ou real")
+                # # Se algum dos dois é real, o resultado é real; caso contrário, é inteiro
+                # if left_type == 'real' or right_type == 'real':
+                #     return 'real'
+                # else:
+                #     return 'integer'
+                
+                
+                # if op == '/':
+                # # A divisão `/` em Pascal retorna sempre real, mesmo com inteiros
+                # if left_type not in ['integer', 'real'] or right_type not in ['integer', 'real']:
+                #     self.errors.append("Erro: operação '/' requer operandos do tipo inteiro ou real")
+                # return 'real'
+                # else:
+                # if left_type not in ['integer', 'real'] or right_type not in ['integer', 'real']:
+                #     self.errors.append("Erro: operação aritmética requer operandos do tipo inteiro ou real")
+                # if left_type == 'real' or right_type == 'real':
+                #     return 'real'
+                # else:
+                #     return 'integer'
+
 
 
         # elif op == '/':
@@ -200,6 +264,8 @@ class SemanticAnalyzer:
             return 'integer'
         elif node.type == 'real':
             return 'real'
+        elif node.type == 'formatted_output': # NOVO 
+            return self._get_expression_type(node.children[0])  # O tipo da variável original -> NOVO 
         elif node.type == 'boolean':
             return 'boolean'
         elif node.type == 'string':

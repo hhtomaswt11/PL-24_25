@@ -308,6 +308,15 @@ class PascalParser:
         else:  # LPAREN expression RPAREN
             p[0] = p[2]
     
+    def p_formatted_expression(self,p): # NOVO 
+        '''expression : variable COLON INTEGER
+                    | variable COLON INTEGER COLON INTEGER'''
+        if len(p) == 4:
+            p[0] = ASTNode('formatted_output', [p[1], ASTNode('integer', leaf=p[3])])
+        else:
+            p[0] = ASTNode('formatted_output', [p[1], ASTNode('integer', leaf=p[3]), ASTNode('integer', leaf=p[5])])
+    
+
     # Regra para chamada de função
     def p_function_call(self, p):
         '''function_call : ID LPAREN expression_list RPAREN

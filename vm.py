@@ -51,6 +51,17 @@ class VirtualMachine:
                 case "storeg":
                     value = self.stack.pop()
                     self.gp[int(parts[1])] = value
+                    
+                case "load":
+                    index = int(parts[1])
+                    if index != 0:
+                        print(f"LOAD só suporta índice 0. Recebido: {index}")
+                        self.running = False
+                        return
+                    addr = self.stack.pop()
+                    self.stack.append(self.gp[addr])
+
+
                 case "add":
                     b, a = self.stack.pop(), self.stack.pop()
                     self.stack.append(a + b)
@@ -111,6 +122,29 @@ class VirtualMachine:
                 case "jump":
                     self.ip = self.labels[parts[1]]
                     continue
+                
+                
+                case "store":
+                    index = int(parts[1])
+                    val = self.stack.pop()
+                    addr = self.stack.pop()
+                    # Só permitimos STORE index == 0 (como os professores especificam)
+                    if index != 0:
+                        print(f"STORE só suporta índice 0. Recebido: {index}")
+                        self.running = False
+                        return
+                    self.gp[addr] = val
+
+                
+                case "stri":
+                    val = self.stack.pop()
+                    self.stack.append(str(val))  # converte int para string
+
+                case "strf":
+                    val = self.stack.pop()
+                    self.stack.append(f"{val:.2f}")  # converte float para string com 2 casas decimais
+
+
                 case "jz":
                     label = parts[1]
                     val = self.stack.pop()
