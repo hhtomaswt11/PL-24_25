@@ -104,13 +104,13 @@ class SemanticAnalyzer:
 
     def _analyze_assignment(self, node):
         var_node = node.children[0]
-        print(var_node)
+        #print(var_node)
         expr_node = node.children[1]
-        print(expr_node)
+        #print(expr_node)
         var_type = self._get_expression_type(var_node)
-        print(var_type)
+        #print(var_type)
         expr_type = self._get_expression_type(expr_node)
-        print(expr_type)
+        #print(expr_type)
         if var_type and expr_type and var_type != expr_type:
             self.errors.append(f"Erro de tipo: não pode atribuir '{expr_type}' a '{var_type}'")
 

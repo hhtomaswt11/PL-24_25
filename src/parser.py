@@ -24,7 +24,8 @@ class PascalParser:
         self.lexer = create_lexer()
         
         # Obtém os tokens do lexer
-        self.tokens = PascalLexer.tokens + list(PascalLexer.reserved.values())
+        # self.tokens = PascalLexer.tokens + list(PascalLexer.reserved.values())
+        self.tokens = PascalLexer.tokens
         
         # Inicializa a tabela de símbolos
         self.symtab = SymbolTable()
@@ -162,21 +163,18 @@ class PascalParser:
     
     def p_variable(self, p):
         '''variable : ID
-                | ID LBRACKET expression RBRACKET'''
+                | ID LBRACKET expression RBRACKET''' # arrays 
         if len(p) > 2:
             p[0] = ASTNode('array_access', [p[3]], leaf=p[1])
         else:
             p[0] = ASTNode('variable', leaf=p[1])
             
-    # Regra para comando halt
-    def p_halt_statement(self, p):
-        '''halt_statement : HALT SEMICOLON'''
-        p[0] = ASTNode('halt')
 
     # Regra para comando if-then-else
     def p_if_statement(self, p):
         '''if_statement : IF expression THEN statement
                         | IF expression THEN statement ELSE statement'''
+                        
         if len(p) > 5:
             p[0] = ASTNode('if', [p[2], p[4], p[6]])
         else:
@@ -344,12 +342,19 @@ class PascalParser:
     def p_param(self, p):
         '''param : id_list COLON type_spec'''
         p[0] = ASTNode('param', [p[1], p[3]])
+        
+        
+    # Regra para comando halt
+    def p_halt_statement(self, p):
+        '''halt_statement : HALT SEMICOLON'''
+        p[0] = ASTNode('halt')
+
 
     # Regra para produções vazias
     def p_empty(self, p):
         'empty :'
         p[0] = None
-    
+        
     # Tratamento de erros
     def p_error(self, p):
         if p:
@@ -357,17 +362,15 @@ class PascalParser:
             self.errors.append(error_msg)
             print(error_msg)
         else:
-            self.errors.append("Erro de sintaxe: fim inesperado do arquivo")
-            print("Erro de sintaxe: fim inesperado do arquivo")
+            self.errors.append("Erro de sintaxe: fim inesperado do ficheiro")
+            print("Erro de sintaxe: fim inesperado do ficheiro")
     
-    
-    
-    
-    
+
     # Método para analisar uma string
     def parse(self, data):
         self.errors = []
-        return self.parser.parse(data, lexer=self.lexer) # Inicia a análise léxica e sintática ao mesmo tempo
+        return self.parser.parse(data, lexer=self.lexer) 
+    # Inicia a análise léxica e sintática ao mesmo tempo
     # O texto é entregue ao lexer, que transforma em TOKENS com base nas regras t_
     # Com base nos tokens, o parser tenta casa-los com alguma regra p_. Se casar, a árvore AST começa a ser construída. 
     # Cada regra retorna um ASTNode, atribuindo-o a p[0]

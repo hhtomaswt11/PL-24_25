@@ -1,0 +1,42 @@
+pushi 0
+storeg 0
+pushi 0
+storeg 1
+pushi 0
+storeg 2
+start
+pushs "Introduza um número para ver a tabuada:"
+writes
+writeln
+read
+atoi
+storeg 1
+pushi 1
+storeg 0
+pushi 10
+storeg 2
+FOR1:
+pushg 0
+pushg 2
+sup
+jnz ENDFOR0
+pushg 1
+writei
+pushs "x"
+writes
+pushg 0
+writei
+pushs "="
+writes
+pushg 1
+pushg 0
+mul
+writei
+writeln
+pushg 0
+pushi 1
+add
+storeg 0
+jump FOR1
+ENDFOR0:
+stop

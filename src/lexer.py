@@ -1,95 +1,48 @@
-import ply.lex as lex, sys 
+import ply.lex as lex
 
 class PascalLexer:
     """
     Analisador léxico para a linguagem Pascal Standard.
     Converte o código fonte em uma sequência de tokens.
     """
-    
-    # Lista de nomes de tokens
+
+    # Lista de nomes de tokens (a ordem aqui não importa)
     tokens = [
-        'ID',             # Identificadores
-        'INTEGER',        # Números inteiros
-        'REAL',           # Números reais
-        'STRING',         # Strings
-        'PLUS',           # Operador +
-        'MINUS',          # Operador -
-        'TIMES',          # Operador *
-        'DIVIDE',         # Operador /
-        'LPAREN',         # (
-        'RPAREN',         # )
-        'LBRACKET',       # [
-        'RBRACKET',       # ]
-        'SEMICOLON',      # ;
-        'COLON',          # :
-        'COMMA',          # ,
-        'PERIOD',         # .
-        'ASSIGN',         # :=
-        'EQ',             # =
-        'NEQ',            # <>
-        'LT',             # <
-        'GT',             # >
-        'LE',             # <=
-        'GE',             # >=
-        'APOSTROPHE',     # '
-        'COMMENT',        # Comentários
+        'ID',
+        'INTEGER',
+        'REAL',
+        'STRING',
+        'PLUS',
+        'MINUS',
+        'TIMES',
+        'DIVIDE',
+        'LPAREN',
+        'RPAREN',
+        'LBRACKET',
+        'RBRACKET',
+        'SEMICOLON',
+        'COLON',
+        'COMMA',
+        'PERIOD',
+        'ASSIGN',
+        'EQ',
+        'NEQ',
+        'LT',
+        'GT',
+        'LE',
+        'GE',
+        'APOSTROPHE',
+        'COMMENT',
+        # Palavras reservadas
+        'AND', 'ARRAY', 'BEGIN', 'CASE', 'CONST', 'DIV', 'DO', 'DOWNTO', 'ELSE', 'END',
+        'FILE', 'FOR', 'FUNCTION', 'GOTO', 'IF', 'IN', 'LABEL', 'MOD', 'NIL', 'NOT',
+        'OF', 'OR', 'PACKED', 'PROCEDURE', 'PROGRAM', 'RECORD', 'REPEAT', 'SET',
+        'THEN', 'TO', 'TYPE', 'UNTIL', 'VAR', 'WHILE', 'WITH',
+        'TRUE', 'FALSE', 'BOOLEAN', 'INTEGER_TYPE', 'REAL_TYPE', 'STRING_TYPE', 'CHAR_TYPE',
+        'WRITELN', 'READLN', 'WRITE', 'READ', 'HALT'
     ]
-    
-    # Palavras-chave da linguagem Pascal
-    reserved = {
-        'and': 'AND',
-        'array': 'ARRAY',
-        'begin': 'BEGIN',
-        'case': 'CASE',
-        'const': 'CONST',
-        'div': 'DIV',
-        'do': 'DO',
-        'downto': 'DOWNTO',
-        'else': 'ELSE',
-        'end': 'END',
-        'file': 'FILE',
-        'for': 'FOR',
-        'function': 'FUNCTION',
-        'goto': 'GOTO',
-        'if': 'IF',
-        'in': 'IN',
-        'label': 'LABEL',
-        'mod': 'MOD',
-        'nil': 'NIL',
-        'not': 'NOT',
-        'of': 'OF',
-        'or': 'OR',
-        'packed': 'PACKED',
-        'procedure': 'PROCEDURE',
-        'program': 'PROGRAM',
-        'record': 'RECORD',
-        'repeat': 'REPEAT',
-        'set': 'SET',
-        'then': 'THEN',
-        'to': 'TO',
-        'type': 'TYPE',
-        'until': 'UNTIL',
-        'var': 'VAR',
-        'while': 'WHILE',
-        'with': 'WITH',
-        'true': 'TRUE',
-        'false': 'FALSE',
-        'boolean': 'BOOLEAN',
-        'integer': 'INTEGER_TYPE',
-        'real': 'REAL_TYPE',
-        'string': 'STRING_TYPE',
-        'char': 'CHAR_TYPE',
-        'writeln': 'WRITELN',
-        'readln': 'READLN',
-        'write': 'WRITE',
-        'read': 'READ',
-        'halt': 'HALT',
-    }
-    
-    # Adiciona as palavras-chave à lista de tokens
-    tokens = tokens + list(reserved.values())
-    
-    # Regras de expressões regulares para tokens simples
+
+    # Expressões regulares para tokens simples
     t_PLUS = r'\+'
     t_MINUS = r'-'
     t_TIMES = r'\*'
@@ -110,77 +63,254 @@ class PascalLexer:
     t_GE = r'>='
     t_APOSTROPHE = r'\''
 
-    # Regra para o operador de atribuição (:=)
+    # Operador de atribuição
     def t_ASSIGN(self, t):
         r':='
         return t
-    
-    # Regra para identificadores
-    def t_ID(self, t): # Para poder diferenciar qual string recebe 
-        r'[a-zA-Z][a-zA-Z0-9_]*'
-        # Verifica se é uma palavra-chave
-        t.type = self.reserved.get(t.value.lower(), 'ID')
-        return t
-    
-    # Regra para números reais
+
+    # Números reais - deve vir antes de INTEGER
     def t_REAL(self, t):
         r'\d+\.\d+'
         t.value = float(t.value)
         return t
-    
-    # Regra para números inteiros
+
+    # Números inteiros
     def t_INTEGER(self, t):
         r'\d+'
         t.value = int(t.value)
         return t
-    
-    # Regra para strings
+
+    # Strings
     def t_STRING(self, t):
         r"'[^']*'"
-        t.value = t.value[1:-1]  # remove as aspas
+        t.value = t.value[1:-1]  
         return t
 
+    def t_INTEGER_TYPE(self, t):
+        r'\binteger\b'
+        return t
+
+    def t_WRITELN(self, t):
+        r'\bwriteln\b'
+        return t
+
+    def t_READLN(self, t):
+        r'\breadln\b'
+        return t
+
+    def t_BOOLEAN(self, t):
+        r'\bboolean\b'
+        return t
+
+    def t_STRING_TYPE(self, t):
+        r'\bstring\b'
+        return t
+
+    def t_CHAR_TYPE(self, t):
+        r'\bchar\b'
+        return t
+
+    def t_REAL_TYPE(self, t):
+        r'\breal\b'
+        return t
+
+    def t_PROGRAM(self, t):
+        r'\bprogram\b'
+        return t
+
+    def t_FUNCTION(self, t):
+        r'\bfunction\b'
+        return t
+
+    def t_PROCEDURE(self, t):
+        r'\bprocedure\b'
+        return t
+
+    def t_CONST(self, t):
+        r'\bconst\b'
+        return t
+
+    def t_BEGIN(self, t):
+        r'\bbegin\b'
+        return t
+
+    def t_END(self, t):
+        r'\bend\b'
+        return t
+
+    def t_REPEAT(self, t):
+        r'\brepeat\b'
+        return t
+
+    def t_UNTIL(self, t):
+        r'\buntil\b'
+        return t
+
+    def t_WHILE(self, t):
+        r'\bwhile\b'
+        return t
+
+    def t_DOWNTO(self, t):
+        r'\bdownto\b'
+        return t
+
+    def t_RECORD(self, t):
+        r'\brecord\b'
+        return t
+
+    def t_PACKED(self, t):
+        r'\bpacked\b'
+        return t
+
+    def t_ARRAY(self, t):
+        r'\barray\b'
+        return t
+
+    def t_WRITE(self, t):
+        r'\bwrite\b'
+        return t
+
+    def t_READ(self, t):
+        r'\bread\b'
+        return t
+
+    def t_AND(self, t):
+        r'\band\b'
+        return t
+
+    def t_DIV(self, t):
+        r'\bdiv\b'
+        return t
+
+    def t_MOD(self, t):
+        r'\bmod\b'
+        return t
+
+    def t_NOT(self, t):
+        r'\bnot\b'
+        return t
+
+    def t_FOR(self, t):
+        r'\bfor\b'
+        return t
     
-    # Regra para comentários
+    def t_XOR(self, t):
+        r'\bxor\b'
+        return t
+    
+    def t_OR(self, t):
+        r'\bor\b'
+        return t
+
+    def t_IN(self, t):
+        r'\bin\b'
+        return t
+
+    def t_IF(self, t):
+        r'\bif\b'
+        return t
+
+    def t_DO(self, t):
+        r'\bdo\b'
+        return t
+
+    def t_TO(self, t):
+        r'\bto\b'
+        return t
+
+    def t_OF(self, t):
+        r'\bof\b'
+        return t
+
+    def t_VAR(self, t):
+        r'\bvar\b'
+        return t
+
+    def t_ELSE(self, t):
+        r'\belse\b'
+        return t
+
+    def t_THEN(self, t):
+        r'\bthen\b'
+        return t
+
+    def t_TYPE(self, t):
+        r'\btype\b'
+        return t
+
+    def t_CASE(self, t):
+        r'\bcase\b'
+        return t
+
+    def t_FILE(self, t):
+        r'\bfile\b'
+        return t
+
+    def t_GOTO(self, t):
+        r'\bgoto\b'
+        return t
+
+    def t_WITH(self, t):
+        r'\bwith\b'
+        return t
+
+    def t_LABEL(self, t):
+        r'\blabel\b'
+        return t
+
+    def t_SET(self, t):
+        r'\bset\b'
+        return t
+
+    def t_NIL(self, t):
+        r'\bnil\b'
+        return t
+
+    def t_TRUE(self, t):
+        r'\btrue\b'
+        return t
+
+    def t_FALSE(self, t):
+        r'\bfalse\b'
+        return t
+
+    def t_HALT(self, t):
+        r'\bhalt\b'
+        return t
+
+    # Identificadores normais - deve vir depois de todas as palavras reservadas
+    def t_ID(self, t):
+        r'[a-zA-Z][a-zA-Z0-9_]*'
+        return t
+
+    # Comentários
     def t_COMMENT(self, t):
         r'\{[^}]*\}|\(\*[\s\S]*?\*\)'
-        # Ignora comentários
-        pass
-    
-    # Regra para ignorar espaços e tabs
+        pass  # Ignorar comentários
+
+    # Ignorar espaços e tabs
     t_ignore = ' \t'
-    
-    # Regra para novas linhas
+
+    # Nova linha
     def t_newline(self, t):
         r'\n+'
         t.lexer.lineno += len(t.value)
-    
+
     # Tratamento de erros
     def t_error(self, t):
         print(f"Caractere ilegal '{t.value[0]}' na linha {t.lexer.lineno}")
         t.lexer.skip(1)
-    
+
     # Construção do lexer
     def build(self, **kwargs):
         self.lexer = lex.lex(module=self, **kwargs)
         return self.lexer
-    
-    # Análise de uma entrada
-    # def test(self, data):
-    #     self.lexer.input(data)
-    #     tokens = []
-    #     for tok in self.lexer:
-    #         tokens.append(tok)
-    #     return tokens
-    
-    # Reinicializa o lexer
+
+    # Reinicializar o lexer
     def reset(self):
         self.lexer.lineno = 1
-
 
 # Função para criar uma instância do lexer
 def create_lexer():
     lexer = PascalLexer()
     return lexer.build()
-
-

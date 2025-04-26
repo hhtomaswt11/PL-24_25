@@ -1,0 +1,12 @@
+pushi 0
+storeg 0
+start
+pushi 2
+pushi 2
+add
+pushs "Resultado:"
+writes
+pushg 0
+writei
+writeln
+stop
