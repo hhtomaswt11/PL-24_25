@@ -39,7 +39,7 @@ class PascalLexer:
         'OF', 'OR', 'PACKED', 'PROCEDURE', 'PROGRAM', 'RECORD', 'REPEAT', 'SET',
         'THEN', 'TO', 'TYPE', 'UNTIL', 'VAR', 'WHILE', 'WITH',
         'TRUE', 'FALSE', 'BOOLEAN', 'INTEGER_TYPE', 'REAL_TYPE', 'STRING_TYPE', 'CHAR_TYPE',
-        'WRITELN', 'READLN', 'WRITE', 'READ', 'HALT'
+        'WRITELN', 'READLN', 'WRITE', 'READ', 'HALT', 'LENGTH', 'RETURN'
     ]
 
     # Expressões regulares para tokens simples
@@ -265,6 +265,16 @@ class PascalLexer:
     def t_NIL(self, t):
         r'\bnil\b'
         return t
+    
+    
+    def t_RETURN(self, t):
+        r'\breturn\b'
+        return t
+
+    def t_LENGTH(self, t):
+        r'\blength\b'
+        return t
+
 
     def t_TRUE(self, t):
         r'\btrue\b'

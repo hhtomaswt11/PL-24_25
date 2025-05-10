@@ -33,9 +33,13 @@ class PascalParser:
         # Variáveis para rastreamento de erro
         self.errors = []
         
+        self.current_function = None 
+        
+        
         # Inicializa o parser
         self.parser = yacc.yacc(module=self) # Cria o parser ao compilar as regras p_ 
         
+
     # Definem regras gramaticais.
     
     # Regra para a unidade de programa completa
@@ -49,32 +53,91 @@ class PascalParser:
         p[0] = ASTNode('block', [p[1], p[2]])
 
     def p_declarations(self, p):
-        '''declarations : VAR var_declarations
-                        | function_declaration
+        '''declarations : declaration declarations
                         | empty'''
         if len(p) == 3:
-            p[0] = ASTNode('declarations', [p[2]])
-        elif p[1] is not None:
-            p[0] = ASTNode('declarations', [p[1]])
+            if p[2].type == 'declarations':
+                p[2].children.insert(0, p[1])
+                p[0] = p[2]
+            else:
+                p[0] = ASTNode('declarations', [p[1]])
         else:
-            p[0] = ASTNode('declarations')
-        
-    def p_function_block(self, p):
-        '''function_block : VAR var_declarations compound_statement
-                        | compound_statement'''
-        if len(p) == 4:
-            # VAR declarações + begin...end
-            p[0] = ASTNode('block', [ASTNode('declarations', [p[2]]), p[3]])
-        else:
-            # só begin...end
-            p[0] = ASTNode('block', [ASTNode('declarations'), p[1]])
-
-
+            p[0] = ASTNode('declarations', [])
+            
     def p_declaration(self, p):
         '''declaration : VAR var_declarations
-                    | function_declaration'''
-        p[0] = p[2] if p[1].lower() == 'var' else p[1]
+                    | function_declaration
+                    | procedure_declaration'''
+        if len(p) == 3:  # caso VAR
+            p[0] = ASTNode('var_section', [p[2]])
+        else:
+            p[0] = p[1]
 
+            
+            
+    def p_function_block(self, p):
+        '''function_block : declarations compound_statement
+                          | compound_statement'''
+        if len(p) == 3:
+            p[0] = ASTNode('block', [p[1], p[2]])
+        else:
+            p[0] = ASTNode('block', [ASTNode('declarations', []), p[1]])
+
+
+    # Regra para declarações de funções
+    # def p_function_declaration(self, p):
+    #     '''function_declaration : FUNCTION ID LPAREN param_list RPAREN COLON type_spec SEMICOLON function_block SEMICOLON
+    #                             | FUNCTION ID COLON type_spec SEMICOLON function_block SEMICOLON'''
+    #     if len(p) == 11:  # Com parâmetros
+    #         # AST: function_decl(id, param_list, return_type, block)
+    #         p[0] = ASTNode('function_decl', [
+    #             ASTNode('id', leaf=p[2]),  # Nome da função
+    #             p[4],                      # Lista de parâmetros
+    #             p[7],                      # Tipo de retorno
+    #             p[9]                       # Bloco da função
+    #         ])
+    #     else:  # Sem parâmetros
+    #         p[0] = ASTNode('function_decl', [
+    #             ASTNode('id', leaf=p[2]),
+    #             ASTNode('param_list'),     # Lista vazia de parâmetros
+    #             p[4],                      # Tipo de retorno
+    #             p[6]                       # Bloco da função
+    #         ])
+    
+    
+    def p_function_declaration(self, p):
+        '''function_declaration : FUNCTION ID LPAREN param_list RPAREN COLON type_spec SEMICOLON function_block SEMICOLON
+                                | FUNCTION ID COLON type_spec SEMICOLON function_block SEMICOLON'''
+        self.current_function = p[2]  # Guarda nome da função ativa
+
+        if len(p) == 11:  # Com parâmetros
+            p[0] = ASTNode('function_decl', [
+                ASTNode('id', leaf=p[2]), p[4], p[7], p[9]
+            ])
+        else:
+            p[0] = ASTNode('function_decl', [
+                ASTNode('id', leaf=p[2]), ASTNode('param_list'), p[4], p[6]
+            ])
+
+        self.current_function = None  # Sai da função
+
+
+
+
+    # Regra para declarações de procedimentos
+    def p_procedure_declaration(self, p):
+        '''procedure_declaration : PROCEDURE ID LPAREN param_list RPAREN SEMICOLON function_block SEMICOLON
+                                 | PROCEDURE ID SEMICOLON function_block SEMICOLON'''
+        if len(p) == 9:  # Com parâmetros
+            p[0] = ASTNode('procedure_decl', [ASTNode('id', leaf=p[2]), p[4], p[7]])
+            
+            # Adiciona na tabela de símbolos
+            self.symtab.add_symbol(p[2], type=None, kind="procedure", params=p[4])
+        else:  # Sem parâmetros
+            p[0] = ASTNode('procedure_decl', [ASTNode('id', leaf=p[2]), ASTNode('param_list'), p[4]])
+            
+            # Adiciona na tabela de símbolos
+            self.symtab.add_symbol(p[2], type=None, kind="procedure", params=ASTNode('param_list'))
     
     # Regra para declarações de variáveis
     def p_var_declarations(self, p):
@@ -119,6 +182,9 @@ class PascalParser:
                 p[0] = p[1]
             else:
                 p[0] = ASTNode('type', leaf=p[1])
+        elif p[1] == "char":
+         p[0] = ASTNode("type", leaf="char_type")
+          
     
     # Regra para tipos de array
     def p_array_type(self, p):
@@ -152,15 +218,51 @@ class PascalParser:
                      | while_statement
                      | for_statement
                      | procedure_call_statement
+                     | function_call_statement
                      | halt_statement
                      | empty'''
         p[0] = p[1]
     
     # Regra para comando de atribuição
-    def p_assignment_statement(self, p):
-        '''assignment_statement : variable ASSIGN expression'''
-        p[0] = ASTNode('assignment', [p[1], p[3]])
+    # def p_assignment_statement(self, p):
+    #     '''assignment_statement : variable ASSIGN expression
+    #                             | ID ASSIGN expression'''
+    #     if isinstance(p[1], ASTNode):
+    #         p[0] = ASTNode('assignment', [p[1], p[3]])
+    #     else:
+    #         func_symbol = self.symtab.lookup(p[1])
+    #         print(f"DEBUG: tentativa de atribuição a '{p[1]}' → símbolo: {func_symbol}")
+    #         if func_symbol and func_symbol.kind == 'function':
+    #             p[0] = ASTNode('function_return', [ASTNode('id', leaf=p[1]), p[3]])
+    #             print(f"DEBUG: atribuição a função {p[1]}")
+    #         else:
+    #             p[0] = ASTNode('assignment', [ASTNode('variable', leaf=p[1]), p[3]])
     
+    
+    
+    def p_assignment_statement(self, p):
+        '''assignment_statement : variable ASSIGN expression
+                                | ID ASSIGN expression'''
+        # Caso 1: lado esquerdo é ID simples (ex: Soma := ...)
+        if isinstance(p[1], str):
+            if self.current_function and p[1].lower() == self.current_function.lower():
+                print(f"DEBUG: retorno reconhecido da função '{p[1]}'")
+                p[0] = ASTNode('function_return', [ASTNode('id', leaf=p[1]), p[3]])
+            else:
+                print(f"DEBUG: atribuição comum a '{p[1]}'")
+                p[0] = ASTNode('assignment', [ASTNode('variable', leaf=p[1]), p[3]])
+
+        # Caso 2: lado esquerdo já é um ASTNode (ex: variável ou array)
+        elif isinstance(p[1], ASTNode):
+            # Pode ser: variable(ID)
+            if p[1].type == "variable" and self.current_function and p[1].leaf == self.current_function:
+                print(f"DEBUG: retorno reconhecido da função '{p[1].leaf}'")
+                p[0] = ASTNode('function_return', [ASTNode('id', leaf=p[1].leaf), p[3]])
+            else:
+                print(f"DEBUG: atribuição comum a '{p[1].leaf}'")
+                p[0] = ASTNode('assignment', [p[1], p[3]])
+
+                    
     def p_variable(self, p):
         '''variable : ID
                 | ID LBRACKET expression RBRACKET''' # arrays 
@@ -214,16 +316,39 @@ class PascalParser:
             else:
                 p[0] = ASTNode('procedure_call', [ASTNode('id', leaf=p[1])])
     
+    # Regra específica para chamada de função como um statement
+    def p_function_call_statement(self, p):
+        '''function_call_statement : function_call'''
+        p[0] = ASTNode('function_call_stmt', [p[1]])
+    
     def p_expression_list(self, p):
         '''expression_list : expression_list COMMA expression
-                       | expression'''
+                           | expression'''
         if len(p) > 2:
               p[1].children.append(p[3])
               p[0] = p[1]
         else:
              p[0] = ASTNode('expression_list', [p[1]])
 
+    def p_param_list(self, p):
+        '''param_list : param_list SEMICOLON param
+                      | param
+                      | empty'''
+        if len(p) == 1 or p[1] is None:
+            p[0] = ASTNode('param_list', [])
+        elif len(p) > 2:
+            p[1].children.append(p[3])
+            p[0] = p[1]
+        else:
+            p[0] = ASTNode('param_list', [p[1]])
 
+    def p_param(self, p):
+        '''param : id_list COLON type_spec
+                 | VAR id_list COLON type_spec'''
+        if len(p) == 4:
+            p[0] = ASTNode('param', [p[1], p[3]], leaf='value')  # Parâmetros normais (por valor)
+        else:
+            p[0] = ASTNode('param', [p[2], p[4]], leaf='reference')  # Parâmetros por referência (var)
 
     # Regra para expressões
     def p_expression(self, p):
@@ -281,7 +406,8 @@ class PascalParser:
     
     # Regra para fatores
     def p_factor(self, p):
-        '''factor : variable
+        '''factor : string_access
+                 | variable
                  | INTEGER
                  | REAL
                  | STRING
@@ -306,7 +432,12 @@ class PascalParser:
         else:  # LPAREN expression RPAREN
             p[0] = p[2]
     
-    def p_formatted_expression(self,p): # NOVO 
+    # Acesso a caracteres de uma string: str[index]
+    def p_string_access(self, p):
+        '''string_access : ID LBRACKET expression RBRACKET'''
+        p[0] = ASTNode('string_access', [ASTNode('id', leaf=p[1]), p[3]])
+    
+    def p_formatted_expression(self,p): 
         '''expression : variable COLON INTEGER
                     | variable COLON INTEGER COLON INTEGER'''
         if len(p) == 4:
@@ -318,35 +449,18 @@ class PascalParser:
     # Regra para chamada de função
     def p_function_call(self, p):
         '''function_call : ID LPAREN expression_list RPAREN
-                        | ID LPAREN RPAREN'''
-        if len(p) > 4:
+                        | ID LPAREN RPAREN
+                        | LENGTH LPAREN expression RPAREN'''
+        if p[1].lower() == 'length':
+            p[0] = ASTNode('length_function', [p[3]])
+        elif len(p) > 4:
             p[0] = ASTNode('function_call', [ASTNode('id', leaf=p[1]), p[3]])
         else:
             p[0] = ASTNode('function_call', [ASTNode('id', leaf=p[1])])
-    
-
-    def p_function_declaration(self, p):
-        '''function_declaration : FUNCTION ID LPAREN param_list RPAREN COLON type_spec SEMICOLON function_block SEMICOLON'''
-        p[0] = ASTNode('function_decl', [ASTNode('id', leaf=p[2]), p[4], p[7], p[9]])
-
-            
-    def p_param_list(self, p):
-        '''param_list : param_list SEMICOLON param
-                    | param'''
-        if len(p) > 2:
-            p[1].children.append(p[3])
-            p[0] = p[1]
-        else:
-            p[0] = ASTNode('param_list', [p[1]])
-
-    def p_param(self, p):
-        '''param : id_list COLON type_spec'''
-        p[0] = ASTNode('param', [p[1], p[3]])
-        
         
     # Regra para comando halt
     def p_halt_statement(self, p):
-        '''halt_statement : HALT SEMICOLON'''
+        '''halt_statement : HALT'''
         p[0] = ASTNode('halt')
 
 
@@ -369,19 +483,9 @@ class PascalParser:
     # Método para analisar uma string
     def parse(self, data):
         self.errors = []
-        return self.parser.parse(data, lexer=self.lexer) 
-    # Inicia a análise léxica e sintática ao mesmo tempo
-    # O texto é entregue ao lexer, que transforma em TOKENS com base nas regras t_
-    # Com base nos tokens, o parser tenta casa-los com alguma regra p_. Se casar, a árvore AST começa a ser construída. 
-    # Cada regra retorna um ASTNode, atribuindo-o a p[0]
-    # No fim da analise, o valor de p[0] na regra inicial p_program é o que é retornado
-    # É aplicada uma análise semantica sobre a AST, recursivamente 
-    # Retorna a AST 
+        return self.parser.parse(data, lexer=self.lexer)
 
 
 # Função para criar uma instância do parser
 def create_parser():
     return PascalParser()
-
-
-

@@ -60,30 +60,6 @@ class CodeGenerator:
     def _generate_halt(self, node):
         self.emit("stop")
 
-
-    # def _generate_var_declaration(self, node):
-    #     ids_node, type_node = node.children
-    #     var_type = type_node.leaf
-    #     for id_node in ids_node.children:
-    #         var_name = id_node.leaf
-    #         symbol = self.symtab.lookup(var_name)
-    #         if symbol:
-    #             if symbol.address is None:
-    #                 symbol.address = self.current_offset
-    #                 self.current_offset += 1
-    #             # Gerar declaração da variável
-    #             #comment = f"// inicio declaracao da variavel \"{var_name}\""
-    #             #self.var_declarations.append(comment)
-    #             self.var_declarations.append(f"pushi 0")
-    #             self.var_declarations.append(f"storeg {symbol.address}")
-    #             #self.var_declarations.append(f"// fim declaracao da variavel \"{var_name}\"")
-
-
-
-
-
-
-
     def _generate_var_declaration(self, node):
         ids_node, type_node = node.children
         var_type = type_node.leaf if type_node.leaf else type_node.type  # cobre tipo simples e array_type
@@ -135,68 +111,7 @@ class CodeGenerator:
         self.emit(f"pushg {symbol.address}")
 
     def _generate_integer(self, node):
-        self.emit(f"pushi {node.leaf}")
-        
-        
-    # def _generate_formatted_output(self, node): # NOVO 
-    #     var_node = node.children[0]
-    #     width = node.children[1].leaf
-    #     precision = node.children[2].leaf if len(node.children) > 2 else None
-
-    #     symbol = self.symtab.lookup(var_node.leaf)
-    #     self.emit(f"pushg {symbol.address}")
-
-    #     if symbol.type == 'real':
-    #         if precision is not None:
-    #             self.emit(f"fprecision {precision}")
-    #         self.emit(f"fwidth {width}")
-    #         self.emit("writef")
-    #     elif symbol.type == 'integer':
-    #         self.emit(f"iwidth {width}")
-    #         self.emit("writei")
-    #     else:
-    #         self.emit("writes")  # Para string, sem formatação por agora
-            
-
-
-    # def _generate_formatted_output(self, node):
-    #     var_node = node.children[0]
-    #     symbol = self.symtab.lookup(var_node.leaf)
-
-    #     # Verifica o tipo e gera o código correto
-    #     if symbol.type == 'real':
-    #         self.emit(f"pushg {symbol.address}")
-    #         self.emit("strf")       # Converte real para string
-    #         self.emit("writes")     # Escreve string
-    #     elif symbol.type == 'integer':
-    #         self.emit(f"pushg {symbol.address}")
-    #         self.emit("stri")       # Converte inteiro para string
-    #         self.emit("writes")     # Escreve string
-    #     else:
-    #         self.emit(f"pushg {symbol.address}")
-    #         self.emit("writes")     # String já é string :)
-
-
-
-
-
-
-
-    # def _generate_formatted_output(self, node):
-    #     var_node = node.children[0]
-    #     symbol = self.symtab.lookup(var_node.leaf)
-
-    #     self.emit(f"pushg {symbol.address}")
-    #     if symbol.type == 'real':
-    #         self.emit("strf")
-    #     elif symbol.type == 'integer':
-    #         self.emit("stri")
-    #     self.emit("writes")
-
-
-
-
-         
+        self.emit(f"pushi {node.leaf}")     
         
     def _generate_real(self, node):
         self.emit(f"pushf {node.leaf}")
@@ -348,6 +263,19 @@ class CodeGenerator:
                     else:
                         self.emit("writei")
         self.emit("writeln")
+        
+    
+    def _generate_function_call(self, node):
+        func_name = node.children[0].leaf
+        args = node.children[1].children if len(node.children) > 1 else []
+
+        # Empilha argumentos na ordem
+        for arg in args:
+            self._generate_code(arg)
+
+        self.emit(f"call {func_name}")
+        # Após o call, o resultado da função está no topo da pilha
+
 
 
 
