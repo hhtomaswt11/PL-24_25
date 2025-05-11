@@ -5,6 +5,7 @@ class CodeGenerator:
         self.temp_counter = 0
         self.label_counter = 0
         self.current_offset = 0
+        self.counter = 0
         self.var_declarations = []
         self.main_code = []
         self.errors = []
@@ -86,7 +87,7 @@ class CodeGenerator:
 
     def _generate_var_declaration(self, node):
         ids_node, type_node = node.children
-        var_type = type_node.leaf if type_node.leaf else type_node.type  # cobre tipo simples e array_type
+        var_type = type_node.leaf if type_node.leaf else type_node.type  # handles 'integer', 'array', etc.
 
         for id_node in ids_node.children:
             var_name = id_node.leaf
@@ -97,14 +98,31 @@ class CodeGenerator:
                     symbol.address = self.current_offset
 
                     if symbol.type == "array":
+                        # Allocate array space on heap and store pointer in gp[symbol.address]
+                        self.var_declarations.append(f"pushi {symbol.size}")    # total size
+                        self.var_declarations.append("allocn")                  # allocate on heap
+                        self.var_declarations.append(f"storeg {symbol.address}")  # store pointer in gp
+
+                        # Optionally initialize elements to 0
                         for i in range(symbol.size):
-                            self.var_declarations.append("pushi 0")
-                            self.var_declarations.append(f"storeg {symbol.address + i}")
-                        self.current_offset += symbol.size
+                            self.var_declarations.append(f"pushst {symbol.address}")
+                            self.var_declarations.append(f"pushi 0")
+                            self.var_declarations.append(f"store {i}")
+
+                            #self.var_declarations.append(f"pushg {symbol.address}")
+                            #self.var_declarations.append(f"pushi {i}")
+                            #self.var_declarations.append("add")      # address = base + i
+                            #self.var_declarations.append("pushi 0")  # value to store
+                            #self.var_declarations.append("store 0")            # store at address
+
+                        self.current_offset += 1  # only one global slot is needed (for pointer)
                     else:
+                        # Scalar variable
                         self.var_declarations.append("pushi 0")
                         self.var_declarations.append(f"storeg {symbol.address}")
                         self.current_offset += 1
+
+
 
 
 
@@ -286,6 +304,8 @@ class CodeGenerator:
             self.errors.append(f"Erro: variável '{var_name}' não declarada")
             return
 
+        self.counter = symbol.address
+
         end_label = self._new_label("ENDFOR")
         start_label = self._new_label("FOR")
 
@@ -323,6 +343,7 @@ class CodeGenerator:
         self.emit(f"storeg {symbol.address}")
         self.emit(f"jump {start_label}")
         self.emit(f"{end_label}:")
+
 
     # def _generate_writeln(self, node):
     #     if node.children:
@@ -395,7 +416,6 @@ class CodeGenerator:
 
 
 
-    # Correção para a função que lê valores para arrays
     def _generate_readln(self, node):
         for var_node in node.children:
             if var_node.type == 'variable':
@@ -406,7 +426,7 @@ class CodeGenerator:
                 else:
                     self.emit("atoi")
                 self.emit(f"storeg {symbol.address}")
-            
+
             elif var_node.type == 'array_access':
                 array_name = var_node.leaf
                 symbol = self.symtab.lookup(array_name)
@@ -414,36 +434,35 @@ class CodeGenerator:
                     print(f"[ERRO] _generate_readln: '{array_name}' não é um array válido")
                     continue
 
-                # Coloca o endereço base do array na pilha
-                self.emit(f"pushi {symbol.address}")
-                
-                # Gera o índice
-                self._generate_code(var_node.children[0])  # índice
-                
-                # Subtrai o lower bound se não for zero
-                lower_bound = symbol.dimensions[0]
-                if lower_bound != 0:
-                    self.emit(f"pushi {lower_bound}")
-                    self.emit("sub")
-                
-                # Calcula endereço: base + deslocamento
-                self.emit("add")  # Agora temos o endereço calculado no topo da pilha
-                
-                # Lê o valor e converte conforme necessário
-                self.emit("read")
-                if symbol.element_type == 'real':
-                    self.emit("atof")
-                else:
-                    self.emit("atoi")
-                
-                # Armazena o valor no endereço calculado
-                # ATENÇÃO: A ordem aqui é crucial - o valor lido está no topo da pilha,
-                # e precisamos trocá-lo com o endereço para usar store corretamente
-                self.emit("store 0")  # Armazena o valor lido no endereço calculado
-            
+
+                self.emit(f"pushst {symbol.address}")
+                self.emit(f"pushg {self.counter}")
+                self.emit(f"pushi 1")
+                self.emit("sub")
+                self.emit(f"read")
+                self.emit(f"atoi")
+                self.emit(f"storen")
+
+                # Apply lower bound adjustment
+                #lower_bound = symbol.dimensions[0]
+                #self.emit(f"pushg {symbol.address}")      # base
+                #self._generate_code(var_node.children[0]) # index
+                #if lower_bound != 0:
+                 #   self.emit(f"pushi {lower_bound}")
+                 #  self.emit("sub")
+                #self.emit("add")                          # final address
+
+                #self.emit("read")
+                #if symbol.element_type == 'real':
+                 #   self.emit("atof")
+                #else:
+                 #   self.emit("atoi")
+
+                #self.emit("store 0")   # address must be just under the value on the stack
+
             else:
                 print(f"[ERRO] _generate_readln: tipo inesperado {var_node.type}")
-            
+
 
     # ant 
     # def _generate_array_access(self, node):
@@ -467,9 +486,8 @@ class CodeGenerator:
     #         self.emit(f"pushi {symbol.address}")
     #         self.emit("add")
     #         self.emit("load 0")  # ← leitura indireta do endereço calculado
-    
-    
-    # Correção para a função que acessa arrays
+
+
     def _generate_array_access(self, node):
         array_name = node.leaf
         index_expr = node.children[0]
@@ -479,24 +497,30 @@ class CodeGenerator:
             print(f"[ERRO] _generate_array_access: '{array_name}' não é um array válido")
             return
 
-        # Primeiro coloca o endereço base do array na pilha
-        self.emit(f"pushi {symbol.address}")
-        
-        # Gera o índice
+        # Push the base address (pointer stored in gp[symbol.address])
+        self.emit(f"pushst {symbol.address}")
+        self.emit(f"pushg {self.counter}")
+        self.emit(f"pushi 1")
+        self.emit("sub")
+        self.emit("loadn")
+
+        # Evaluate index expression
         self._generate_code(index_expr)
-        
-        # Subtrai o lower bound se não for zero
-        lower_bound = symbol.dimensions[0]
-        if lower_bound != 0:
-            self.emit(f"pushi {lower_bound}")
-            self.emit("sub")
-        
-        # Adiciona ao endereço base do array (que já está na pilha)
-        self.emit("add")  # Agora temos o endereço calculado no topo da pilha
-        
-        # Carrega o valor do endereço calculado
-        self.emit("pushg 0")  # Coloca um valor qualquer na pilha
-        self.emit("load 0")   # Carrega o valor do endereço calculado
+
+
+        # Adjust index if lower bound != 0
+        #lower_bound = symbol.dimensions[0]
+        #if lower_bound != 0:
+         #   self.emit(f"pushi {lower_bound}")
+         #   self.emit("sub")
+
+        # Compute final address: base + index
+        #self.emit("add")
+
+        # Load the value at the computed address
+        #self.emit("load 0")
+
+
 
 
 

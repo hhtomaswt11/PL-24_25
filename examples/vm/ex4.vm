@@ -1,5 +1,21 @@
-pushi 0
+pushi 5
+allocn
 storeg 0
+pushst 0
+pushi 0
+store 0
+pushst 0
+pushi 0
+store 1
+pushst 0
+pushi 0
+store 2
+pushst 0
+pushi 0
+store 3
+pushst 0
+pushi 0
+store 4
 pushi 0
 storeg 1
 pushi 0
@@ -12,51 +28,77 @@ pushi 0
 storeg 5
 pushi 0
 storeg 6
-pushi 0
-storeg 7
 start
 pushi 0
-storeg 6
+storeg 3
 pushs "Introduza 5 números inteiros:"
 writes
 writeln
 pushi 1
-storeg 5
+storeg 1
 pushi 5
-storeg 7
+storeg 5
 FOR1:
+pushg 1
 pushg 5
-pushg 7
 sup
 not
 jz ENDFOR0
-pushi 0
-pushg 5
+pushst 0
+pushg 1
 pushi 1
 sub
-add
 read
 atoi
-store 0
-pushg 6
-pushi 0
-pushg 5
+storen
+pushg 3
+pushst 0
+pushg 1
 pushi 1
 sub
+loadn
+pushg 1
 add
-pushg 0
-load 0
-add
+storeg 3
+pushi 1
+storeg 2
+pushg 1
 storeg 6
-pushg 5
+FOR3:
+pushg 2
+pushg 6
+sup
+not
+jz ENDFOR2
+pushg 4
+pushst 0
+pushg 2
+pushi 1
+sub
+loadn
+pushg 2
+add
+storeg 4
+pushg 2
 pushi 1
 add
-storeg 5
+storeg 2
+jump FOR3
+ENDFOR2:
+pushg 1
+pushi 1
+add
+storeg 1
 jump FOR1
 ENDFOR0:
 pushs "A soma dos números é: "
 writes
-pushg 6
+pushg 3
+writei
+writeln
+pushs "A soma2 dos números é: "
+writes
+pushg 4
 writei
 writeln
 stop
