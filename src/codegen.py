@@ -148,9 +148,27 @@ class CodeGenerator:
             symbol = self.symtab.lookup(var_node.leaf)
             self.emit(f"storeg {symbol.address}")
 
+    # def _generate_variable(self, node):
+    #     symbol = self.symtab.lookup(node.leaf)
+    #     print('sexto pushg')
+    #     self.emit(f"pushg {symbol.address}")             # FUNCIONA PARA ARRAYS
+    
+    
+    
     def _generate_variable(self, node):
         symbol = self.symtab.lookup(node.leaf)
-        self.emit(f"pushg {symbol.address}")
+        
+        # Verificar se estamos em um contexto após loadn
+        # Poderíamos adicionar um flag para rastrear isso
+        if hasattr(self, '_after_loadn') and self._after_loadn:
+            # Se estamos após um loadn, não precisamos do pushg adicional
+            self._after_loadn = False  # Resetar a flag
+            return
+            
+        print('sexto pushg')
+        self.emit(f"pushg {symbol.address}")  # FUNCIONA PARA ARRAYS
+
+
 
     def _generate_integer(self, node):
         self.emit(f"pushi {node.leaf}")
@@ -323,7 +341,9 @@ class CodeGenerator:
         self.emit(f"storeg {final_var}")
 
         self.emit(f"{start_label}:")
+        print('primeiro pushg')
         self.emit(f"pushg {symbol.address}")
+        print('segundo pushg')
         self.emit(f"pushg {final_var}")
 
         # self.emit("sup" if direction == "to" else "inf")
@@ -336,8 +356,9 @@ class CodeGenerator:
 
 
         self._generate_code(node.children[3])
-
+        print('terceiro pushg')
         self.emit(f"pushg {symbol.address}")
+        
         self.emit(f"pushi {-1 if direction == 'downto' else 1}")
         self.emit("add")
         self.emit(f"storeg {symbol.address}")
@@ -436,6 +457,7 @@ class CodeGenerator:
 
 
                 self.emit(f"pushst {symbol.address}")
+                print('quarto pushg')
                 self.emit(f"pushg {self.counter}")
                 self.emit(f"pushi 1")
                 self.emit("sub")
@@ -499,10 +521,14 @@ class CodeGenerator:
 
         # Push the base address (pointer stored in gp[symbol.address])
         self.emit(f"pushst {symbol.address}")
+        print('quinto pushg')
         self.emit(f"pushg {self.counter}")
         self.emit(f"pushi 1")
         self.emit("sub")
+        print('primeiro loadn')
         self.emit("loadn")
+        
+        self._after_loadn = True
 
         # Evaluate index expression
         self._generate_code(index_expr)

@@ -23,18 +23,16 @@ storeg 2
 pushi 0
 storeg 3
 start
-pushi 0
-storeg 2
-pushs "Introduza 5 números inteiros:"
+pushs "Introduza 5 números:"
 writes
 writeln
 pushi 1
 storeg 1
 pushi 5
-storeg 3
+storeg 2
 FOR1:
 pushg 1
-pushg 3
+pushg 2
 sup
 not
 jz ENDFOR0
@@ -45,23 +43,36 @@ sub
 read
 atoi
 storen
-pushg 2
-pushst 0
-pushg 1
-pushi 1
-sub
-loadn
-add
-storeg 2
 pushg 1
 pushi 1
 add
 storeg 1
 jump FOR1
 ENDFOR0:
-pushs "A soma dos números é: "
+pushs "Em ordem inversa:"
 writes
-pushg 2
+writeln
+pushi 5
+storeg 1
+pushi 1
+storeg 3
+FOR3:
+pushg 1
+pushg 3
+inf
+not
+jz ENDFOR2
+pushst 0
+pushg 1
+pushi 1
+sub
+loadn
 writei
 writeln
+pushg 1
+pushi -1
+add
+storeg 1
+jump FOR3
+ENDFOR2:
 stop

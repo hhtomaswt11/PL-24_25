@@ -51,7 +51,7 @@ class VirtualMachine:
                 case "storeg":
                     value = self.stack.pop()
                     self.gp[int(parts[1])] = value
-                    
+
                 case "load":
                     index = int(parts[1])
                     if index != 0:
@@ -124,16 +124,48 @@ class VirtualMachine:
                     continue
                 
                 
+                # case "store":
+                #     index = int(parts[1])
+                #     val = self.stack.pop()
+                #     addr = self.stack.pop()
+                #     # Só permitimos STORE index == 0 (como os professores especificam)
+                #     if index != 0:
+                #         print(f"STORE só suporta índice 0. Recebido: {index}")
+                #         self.running = False
+                #         return
+                #     self.gp[addr] = val
+
+
+
+                case "storen":
+                    val = self.stack.pop()
+                    index = self.stack.pop()
+                    addr = self.stack.pop()
+                    final_addr = addr + index
+                    if final_addr >= len(self.gp):
+                        self.gp.extend([0] * ((final_addr + 1) - len(self.gp)))  # Expande a memória se necessário
+                    self.gp[final_addr] = val
+                    
+                
+                case "loadn":
+                    index = self.stack.pop()
+                    addr = self.stack.pop()
+                    final_addr = addr + index
+                    if final_addr >= len(self.gp):
+                        print(f"[ERRO] LOADN: endereço {final_addr} fora da memória")
+                        self.running = False
+                        return
+                    self.stack.append(self.gp[final_addr])
+
+
+
                 case "store":
                     index = int(parts[1])
                     val = self.stack.pop()
                     addr = self.stack.pop()
-                    # Só permitimos STORE index == 0 (como os professores especificam)
-                    if index != 0:
-                        print(f"STORE só suporta índice 0. Recebido: {index}")
-                        self.running = False
-                        return
-                    self.gp[addr] = val
+                    if addr + index >= len(self.gp):
+                        self.gp.extend([0] * ((addr + index + 1) - len(self.gp)))  # Expande memória se necessário
+                    self.gp[addr + index] = val
 
                 
                 case "stri":
@@ -143,6 +175,20 @@ class VirtualMachine:
                 case "strf":
                     val = self.stack.pop()
                     self.stack.append(f"{val:.2f}")  # converte float para string com 2 casas decimais
+                    
+                    
+                case "allocn": # NOVO
+                    n = self.stack.pop()
+                    addr = len(self.gp)
+                    self.gp.extend([0] * n)
+                    self.stack.append(addr)
+
+
+                case "pushst":
+                    index = int(parts[1])
+                    addr = self.gp[index]  # Este é o endereço da heap guardado em gp[index]
+                    self.stack.append(addr)
+
 
 
                 case "jz":

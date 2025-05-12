@@ -53,6 +53,11 @@ sub
 loadn
 add
 storeg 2
+pushs "Soma acumulada até ao momento: "
+writes
+pushg 2
+writei
+writeln
 pushg 1
 pushi 1
 add
