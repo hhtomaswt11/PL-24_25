@@ -19,12 +19,12 @@ pushi 1
 storeg 1
 pushg 0
 storeg 3
-FOR1:
+PARA_2:
 pushg 1
 pushg 3
 sup
 not
-jz ENDFOR0
+jz FIMPARA_1
 pushg 2
 pushg 1
 mul
@@ -33,8 +33,8 @@ pushg 1
 pushi 1
 add
 storeg 1
-jump FOR1
-ENDFOR0:
+jump PARA_2
+FIMPARA_1:
 pushs "Fatorial de "
 writes
 pushg 0
