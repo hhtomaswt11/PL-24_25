@@ -1,14 +1,14 @@
 import sys
-from src.parser import create_parser
-from src.lexer import create_lexer
+from src.parser import criar_parser
+from src.analisador_lexico import criar_analisador_lexico
 
 if __name__ == "__main__":
     pascal_file= sys.argv[1]
     with open(pascal_file, 'r') as file:
       source_code = file.read()
     
-    parser = create_parser()
-    lexer = create_lexer()
+    parser = criar_parser()
+    lexer = criar_analisador_lexico()
     
     lexer.input(source_code)
     ast = parser.parse(source_code)

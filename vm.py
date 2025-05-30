@@ -5,62 +5,58 @@ import sys, shlex
 class VirtualMachine:
     def __init__(self):
         self.stack = []
-        self.gp = [0] * 1000  # memória global simulada
+        self.memoria_global = [0] * 1000  # memória global simulada
         self.labels = {}
-        self.ip = 0  # instruction pointer
-        self.code = []
+        self.ponteiro_instrucao = 0  # instruction pointer
+        self.codigo = []
         self.running = True
 
-    def load_code(self, code_lines):
-        self.code = code_lines
-        self._map_labels()
+    def load_code(self, linhas_codigo):
+        self.codigo = linhas_codigo
+        self._mapear_labels()
 
-    def _map_labels(self):
-        for i, line in enumerate(self.code):
-            if line.endswith(":"):
-                label = line[:-1]
+    def _mapear_labels(self):
+        for i, linha in enumerate(self.codigo):
+            if linha.endswith(":"):
+                label = linha[:-1]
                 self.labels[label] = i
 
     def run(self):
-        self.ip = 0
-        while self.running and self.ip < len(self.code):
-            line = self.code[self.ip]
-            if line.endswith(":"):
-                self.ip += 1
+        self.ponteiro_instrucao = 0
+        while self.running and self.ponteiro_instrucao < len(self.codigo):
+            linha = self.codigo[self.ponteiro_instrucao]
+            if linha.endswith(":"):
+                self.ponteiro_instrucao += 1
                 continue
 
-            #parts = shlex.split(line)
-            
-            if line.strip().startswith("//") or line.strip() == "":
-                self.ip += 1
+            if linha.strip().startswith("//") or linha.strip() == "":
+                self.ponteiro_instrucao += 1
                 continue
 
-            parts = shlex.split(line)
-            
-            instr = parts[0].lower()
+            partes = shlex.split(linha)
+            instr = partes[0].lower()
 
             match instr:
                 case "pushi":
-                    self.stack.append(int(parts[1]))
+                    self.stack.append(int(partes[1]))
                 case "pushf":
-                    self.stack.append(float(parts[1]))
+                    self.stack.append(float(partes[1]))
                 case "pushg":
-                    self.stack.append(self.gp[int(parts[1])])
+                    self.stack.append(self.memoria_global[int(partes[1])])
                 case "pushs":
-                    self.stack.append(parts[1])
+                    self.stack.append(partes[1])
                 case "storeg":
-                    value = self.stack.pop()
-                    self.gp[int(parts[1])] = value
+                    valor = self.stack.pop()
+                    self.memoria_global[int(partes[1])] = valor
 
                 case "load":
-                    index = int(parts[1])
-                    if index != 0:
-                        print(f"LOAD só suporta índice 0. Recebido: {index}")
+                    indice = int(partes[1])
+                    if indice != 0:
+                        print(f"LOAD só suporta índice 0. Recebido: {indice}")
                         self.running = False
                         return
-                    addr = self.stack.pop()
-                    self.stack.append(self.gp[addr])
-
+                    endereco = self.stack.pop()
+                    self.stack.append(self.memoria_global[endereco])
 
                 case "add":
                     b, a = self.stack.pop(), self.stack.pop()
@@ -105,8 +101,8 @@ class VirtualMachine:
                     a = self.stack.pop()
                     self.stack.append(int(not a))
                 case "read":
-                    value = input()
-                    self.stack.append(value)
+                    valor = input()
+                    self.stack.append(valor)
                 case "atoi":
                     s = self.stack.pop()
                     self.stack.append(int(s))
@@ -120,88 +116,66 @@ class VirtualMachine:
                 case "writeln":
                     print()
                 case "jump":
-                    self.ip = self.labels[parts[1]]
+                    self.ponteiro_instrucao = self.labels[partes[1]]
                     continue
-                
-                
-                # case "store":
-                #     index = int(parts[1])
-                #     val = self.stack.pop()
-                #     addr = self.stack.pop()
-                #     # Só permitimos STORE index == 0 (como os professores especificam)
-                #     if index != 0:
-                #         print(f"STORE só suporta índice 0. Recebido: {index}")
-                #         self.running = False
-                #         return
-                #     self.gp[addr] = val
-
-
 
                 case "storen":
-                    val = self.stack.pop()
-                    index = self.stack.pop()
-                    addr = self.stack.pop()
-                    final_addr = addr + index
-                    if final_addr >= len(self.gp):
-                        self.gp.extend([0] * ((final_addr + 1) - len(self.gp)))  # Expande a memória se necessário
-                    self.gp[final_addr] = val
-                    
-                
+                    valor = self.stack.pop()
+                    indice = self.stack.pop()
+                    endereco = self.stack.pop()
+                    endereco_final = endereco + indice
+                    if endereco_final >= len(self.memoria_global):
+                        self.memoria_global.extend([0] * ((endereco_final + 1) - len(self.memoria_global)))  # Expande a memória se necessário
+                    self.memoria_global[endereco_final] = valor
+
                 case "loadn":
-                    index = self.stack.pop()
-                    addr = self.stack.pop()
-                    final_addr = addr + index
-                    if final_addr >= len(self.gp):
-                        print(f"[ERRO] LOADN: endereço {final_addr} fora da memória")
+                    indice = self.stack.pop()
+                    endereco = self.stack.pop()
+                    endereco_final = endereco + indice
+                    if endereco_final >= len(self.memoria_global):
+                        print(f"[ERRO] LOADN: endereço {endereco_final} fora da memória")
                         self.running = False
                         return
-                    self.stack.append(self.gp[final_addr])
-
-
+                    self.stack.append(self.memoria_global[endereco_final])
 
                 case "store":
-                    index = int(parts[1])
-                    val = self.stack.pop()
-                    addr = self.stack.pop()
-                    if addr + index >= len(self.gp):
-                        self.gp.extend([0] * ((addr + index + 1) - len(self.gp)))  # Expande memória se necessário
-                    self.gp[addr + index] = val
+                    indice = int(partes[1])
+                    valor = self.stack.pop()
+                    endereco = self.stack.pop()
+                    if endereco + indice >= len(self.memoria_global):
+                        self.memoria_global.extend([0] * ((endereco + indice + 1) - len(self.memoria_global)))  # Expande memória se necessário
+                    self.memoria_global[endereco + indice] = valor
 
-                
                 case "stri":
-                    val = self.stack.pop()
-                    self.stack.append(str(val))  # converte int para string
+                    valor = self.stack.pop()
+                    self.stack.append(str(valor))  # converte int para string
 
                 case "strf":
-                    val = self.stack.pop()
-                    self.stack.append(f"{val:.2f}")  # converte float para string com 2 casas decimais
-                    
-                    
-                case "allocn": # NOVO
-                    n = self.stack.pop()
-                    addr = len(self.gp)
-                    self.gp.extend([0] * n)
-                    self.stack.append(addr)
+                    valor = self.stack.pop()
+                    self.stack.append(f"{valor:.2f}")  # converte float para string com 2 casas decimais
 
+                case "allocn":
+                    n = self.stack.pop()
+                    endereco = len(self.memoria_global)
+                    self.memoria_global.extend([0] * n)
+                    self.stack.append(endereco)
 
                 case "pushst":
-                    index = int(parts[1])
-                    addr = self.gp[index]  # Este é o endereço da heap guardado em gp[index]
-                    self.stack.append(addr)
-
-
+                    indice = int(partes[1])
+                    endereco = self.memoria_global[indice]  # Este é o endereço da heap guardado em memoria_global[indice]
+                    self.stack.append(endereco)
 
                 case "jz":
-                    label = parts[1]
-                    val = self.stack.pop()
-                    if val == 0:
-                        self.ip = self.labels[label]
+                    label = partes[1]
+                    valor = self.stack.pop()
+                    if valor == 0:
+                        self.ponteiro_instrucao = self.labels[label]
                         continue
                 case "jnz":
-                    label = parts[1]
-                    val = self.stack.pop()
-                    if val != 0:
-                        self.ip = self.labels[label]
+                    label = partes[1]
+                    valor = self.stack.pop()
+                    if valor != 0:
+                        self.ponteiro_instrucao = self.labels[label]
                         continue
                 case "start":
                     pass  # FP inicializado no web editor
@@ -211,18 +185,18 @@ class VirtualMachine:
                     print(f"Instrução desconhecida: {instr}")
                     self.running = False
 
-            self.ip += 1
+            self.ponteiro_instrucao += 1
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Uso: python3 vm.py <ficheiro.vm>")
         sys.exit(1)
-    
+
     vm_file = sys.argv[1]
 
     with open(vm_file, "r") as f:
-        code = [line.strip() for line in f.readlines()]
+        codigo = [linha.strip() for linha in f.readlines()]
 
     vm = VirtualMachine()
-    vm.load_code(code)
+    vm.load_code(codigo)
     vm.run()

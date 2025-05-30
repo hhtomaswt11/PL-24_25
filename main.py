@@ -1,8 +1,8 @@
 from colorama import init, Fore
 import sys, os
-from src.parser import create_parser
-from src.semantic import SemanticAnalyzer
-from src.codegen import CodeGenerator
+from src.parser import criar_parser
+from src.semantica import AnalisadorSemantico
+from src.gerador_de_codigo import GeradorDeCodigo
 from vm import VirtualMachine
 
 # python3 main.py examples/pas/hello.pas
@@ -15,31 +15,31 @@ def main(pascal_file):
         source_code = file.read()
 
     # 2. Análise sintática
-    parser = create_parser()
+    parser = criar_parser()
     ast = parser.parse(source_code)
 
-    if parser.errors:
+    if parser.erros:
         print("Erros de parsing:")
-        for e in parser.errors:
+        for e in parser.erros:
             print(" -", e)
         return
 
     print("--- Análise sintática concluída ---")
 
     # 3. Análise semântica
-    analyzer = SemanticAnalyzer()
-    success = analyzer.analyze(ast)
-    if not success:
+    analisador = AnalisadorSemantico()
+    sucesso = analisador.analisar(ast)
+    if not sucesso:
         print("Erros semânticos:")
-        for e in analyzer.errors:
+        for e in analisador.erros:
             print(" -", e)
         return
 
     print("--- Análise semântica concluída ---")
 
     # 4. Geração de código
-    generator = CodeGenerator(analyzer.symtab)
-    code = generator.generate(ast)
+    gerador = GeradorDeCodigo(analisador.tabela_de_simbolos)
+    code = gerador.gerar(ast)
 
     # Preparar caminho de saída na pasta examples/vm/
     filename = os.path.basename(pascal_file).replace(".pas", ".vm")
