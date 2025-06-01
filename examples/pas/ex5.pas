@@ -1,24 +1,14 @@
-program BinarioParaInteiro;
-    function BinToInt(bin: string): integer;
+rogram SomaArray;
 var
-    i, valor, potencia: integer;
+numeros: array[1..5] of integer;
+i, soma: integer;
 begin
-    valor := 0;
-    potencia := 1;
-    for i := length(bin) downto 1 do
-    begin
-        if bin[i] = '1' then
-        valor := valor + potencia;
-        potencia := potencia * 2;
-        end;
-        BinToInt := valor;
-    end;
-    var
-     bin: string;
-    valor: integer;
-    begin
-        writeln('Introduza uma string binária:');
-        readln(bin);
-        valor := BinToInt(bin);
-        writeln('O valor inteiro correspondente é: ', valor);
+soma := 0;
+writeln('Introduza 5 números inteiros:');
+for i := 1 to 5 do
+begin
+readln(numeros[i]);
+soma := soma + numeros[i];
+end;
+writeln('A soma dos números é: ', soma);
 end.
