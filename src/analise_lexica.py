@@ -1,4 +1,5 @@
 import ply.lex as lex
+import re 
 
 class Lexer:
     """
@@ -306,8 +307,10 @@ class Lexer:
         
     # BUILD LEXER 
     def build(self, **kwargs):
-        self.lexer = lex.lex(module=self, **kwargs)
+        self.lexer = lex.lex(module=self, reflags=re.IGNORECASE, **kwargs)
+
         return self.lexer
+    
 
     # reset
     def reset(self):

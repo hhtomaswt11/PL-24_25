@@ -1,4 +1,4 @@
-program Fatorial;
+prOgrAM Fatorial;
 var
     n, i, fat: integer;
 begin
