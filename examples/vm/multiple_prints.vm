@@ -1,9 +1,0 @@
-start
-pushs "Hello"
-writes
-pushs "World"
-writes
-pushi 123
-writei
-writeln
-stop

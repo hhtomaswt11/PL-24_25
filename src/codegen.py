@@ -20,10 +20,9 @@ class CodeGenerator:
         self.code = []
         self.var_declarations = []
         self.main_code = []
-
         self._generate_code(ast)
 
-        # Concatena declarações + start + código + stop
+        # concatena declarações + start + código + stop
         full_code = []
         full_code += self.var_declarations
         full_code.append("start")
@@ -61,30 +60,6 @@ class CodeGenerator:
     def _generate_halt(self, node):
         self.emit("stop")
 
-
-    # def _generate_var_declaration(self, node):
-    #     ids_node, type_node = node.children
-    #     var_type = type_node.leaf
-    #     for id_node in ids_node.children:
-    #         var_name = id_node.leaf
-    #         symbol = self.symtab.lookup(var_name)
-    #         if symbol:
-    #             if symbol.address is None:
-    #                 symbol.address = self.current_offset
-    #                 self.current_offset += 1
-    #             # Gerar declaração da variável
-    #             #comment = f"// inicio declaracao da variavel \"{var_name}\""
-    #             #self.var_declarations.append(comment)
-    #             self.var_declarations.append(f"pushi 0")
-    #             self.var_declarations.append(f"storeg {symbol.address}")
-    #             #self.var_declarations.append(f"// fim declaracao da variavel \"{var_name}\"")
-
-
-
-
-
-
-
     def _generate_var_declaration(self, node):
         ids_node, type_node = node.children
         var_type = type_node.leaf if type_node.leaf else type_node.type  # handles 'integer', 'array', etc.
@@ -98,22 +73,14 @@ class CodeGenerator:
                     symbol.address = self.current_offset
 
                     if symbol.type == "array":
-                        # Allocate array space on heap and store pointer in gp[symbol.address]
                         self.var_declarations.append(f"pushi {symbol.size}")    # total size
                         self.var_declarations.append("allocn")                  # allocate on heap
                         self.var_declarations.append(f"storeg {symbol.address}")  # store pointer in gp
 
-                        # Optionally initialize elements to 0
                         for i in range(symbol.size):
                             self.var_declarations.append(f"pushst {symbol.address}")
                             self.var_declarations.append(f"pushi 0")
                             self.var_declarations.append(f"store {i}")
-
-                            #self.var_declarations.append(f"pushg {symbol.address}")
-                            #self.var_declarations.append(f"pushi {i}")
-                            #self.var_declarations.append("add")      # address = base + i
-                            #self.var_declarations.append("pushi 0")  # value to store
-                            #self.var_declarations.append("store 0")            # store at address
 
                         self.current_offset += 1  # only one global slot is needed (for pointer)
                     else:
@@ -121,18 +88,6 @@ class CodeGenerator:
                         self.var_declarations.append("pushi 0")
                         self.var_declarations.append(f"storeg {symbol.address}")
                         self.current_offset += 1
-
-
-
-
-
-
-
-
-
-
-
-
 
     def _generate_statement_list(self, node):
         for stmt in node.children:
@@ -148,13 +103,6 @@ class CodeGenerator:
             symbol = self.symtab.lookup(var_node.leaf)
             self.emit(f"storeg {symbol.address}")
 
-    # def _generate_variable(self, node):
-    #     symbol = self.symtab.lookup(node.leaf)
-    #     print('sexto pushg')
-    #     self.emit(f"pushg {symbol.address}")             # FUNCIONA PARA ARRAYS
-    
-    
-    
     def _generate_variable(self, node):
         symbol = self.symtab.lookup(node.leaf)
         
@@ -165,74 +113,11 @@ class CodeGenerator:
             self._after_loadn = False  # Resetar a flag
             return
             
-        print('sexto pushg')
-        self.emit(f"pushg {symbol.address}")  # FUNCIONA PARA ARRAYS
-
+        self.emit(f"pushg {symbol.address}")  
 
 
     def _generate_integer(self, node):
         self.emit(f"pushi {node.leaf}")
-        
-        
-    # def _generate_formatted_output(self, node): # NOVO 
-    #     var_node = node.children[0]
-    #     width = node.children[1].leaf
-    #     precision = node.children[2].leaf if len(node.children) > 2 else None
-
-    #     symbol = self.symtab.lookup(var_node.leaf)
-    #     self.emit(f"pushg {symbol.address}")
-
-    #     if symbol.type == 'real':
-    #         if precision is not None:
-    #             self.emit(f"fprecision {precision}")
-    #         self.emit(f"fwidth {width}")
-    #         self.emit("writef")
-    #     elif symbol.type == 'integer':
-    #         self.emit(f"iwidth {width}")
-    #         self.emit("writei")
-    #     else:
-    #         self.emit("writes")  # Para string, sem formatação por agora
-            
-
-
-    # def _generate_formatted_output(self, node):
-    #     var_node = node.children[0]
-    #     symbol = self.symtab.lookup(var_node.leaf)
-
-    #     # Verifica o tipo e gera o código correto
-    #     if symbol.type == 'real':
-    #         self.emit(f"pushg {symbol.address}")
-    #         self.emit("strf")       # Converte real para string
-    #         self.emit("writes")     # Escreve string
-    #     elif symbol.type == 'integer':
-    #         self.emit(f"pushg {symbol.address}")
-    #         self.emit("stri")       # Converte inteiro para string
-    #         self.emit("writes")     # Escreve string
-    #     else:
-    #         self.emit(f"pushg {symbol.address}")
-    #         self.emit("writes")     # String já é string :)
-
-
-
-
-
-
-
-    # def _generate_formatted_output(self, node):
-    #     var_node = node.children[0]
-    #     symbol = self.symtab.lookup(var_node.leaf)
-
-    #     self.emit(f"pushg {symbol.address}")
-    #     if symbol.type == 'real':
-    #         self.emit("strf")
-    #     elif symbol.type == 'integer':
-    #         self.emit("stri")
-    #     self.emit("writes")
-
-
-
-
-         
         
     def _generate_real(self, node):
         self.emit(f"pushf {node.leaf}")
@@ -246,7 +131,6 @@ class CodeGenerator:
     def _generate_binary_op(self, node):
         self._generate_code(node.children[0])
         self._generate_code(node.children[1])
-
         op = node.leaf
         if op == '+':
             self.emit("add")
@@ -289,13 +173,10 @@ class CodeGenerator:
     def _generate_if(self, node):
         false_label = self._new_label("ELSE")
         end_label = self._new_label("ENDIF")
-
         self._generate_code(node.children[0])
         self.emit(f"jz {false_label}")
-
         self._generate_code(node.children[1])
         self.emit(f"jump {end_label}")
-
         self.emit(f"{false_label}:")
         if len(node.children) > 2:
             self._generate_code(node.children[2])
@@ -323,7 +204,6 @@ class CodeGenerator:
             return
 
         self.counter = symbol.address
-
         end_label = self._new_label("ENDFOR")
         start_label = self._new_label("FOR")
 
@@ -336,46 +216,22 @@ class CodeGenerator:
         self.current_offset += 1
         self.var_declarations.append(f"pushi 0")
         self.var_declarations.append(f"storeg {final_var}")
-
         self._generate_code(node.children[2])
         self.emit(f"storeg {final_var}")
-
         self.emit(f"{start_label}:")
-        print('primeiro pushg')
         self.emit(f"pushg {symbol.address}")
-        print('segundo pushg')
         self.emit(f"pushg {final_var}")
-
-        # self.emit("sup" if direction == "to" else "inf")
-        # self.emit(f"jnz {end_label}")
         self.emit("sup" if direction == "to" else "inf")
         self.emit("not")  # Inverte a condição
         self.emit(f"jz {end_label}")
-
-
-
-
         self._generate_code(node.children[3])
-        print('terceiro pushg')
         self.emit(f"pushg {symbol.address}")
-        
         self.emit(f"pushi {-1 if direction == 'downto' else 1}")
         self.emit("add")
         self.emit(f"storeg {symbol.address}")
         self.emit(f"jump {start_label}")
         self.emit(f"{end_label}:")
 
-
-    # def _generate_writeln(self, node):
-    #     if node.children:
-    #         for expr in node.children[0].children:
-    #             self._generate_code(expr)
-    #             if expr.type == 'string':
-    #                 self.emit("writes")
-    #             else:
-    #                 self.emit("writei")
-    #     self.emit("writeln")
-    
     def _generate_writeln(self, node):
         if node.children:
             for expr in node.children[0].children:
@@ -390,52 +246,6 @@ class CodeGenerator:
                     else:
                         self.emit("writei")
         self.emit("writeln")
-
-
-
-
-
-    # def _generate_readln(self, node):
-    #     for var_node in node.children:
-    #         if var_node.type == 'variable':
-    #             symbol = self.symtab.lookup(var_node.leaf)
-    #             self.emit("read")
-    #             if symbol.type == 'real':
-    #                 self.emit("atof")
-    #             else:
-    #                 self.emit("atoi")
-    #             self.emit(f"storeg {symbol.address}")
-            
-    #         elif var_node.type == 'array_access':
-    #             array_name = var_node.leaf
-    #             symbol = self.symtab.lookup(array_name)
-    #             if symbol is None or symbol.type != 'array':
-    #                 print(f"[ERRO] _generate_readln: '{array_name}' não é um array válido")
-    #                 continue
-
-    #             # Gera o índice
-    #             self._generate_code(var_node.children[0])  # índice
-    #             lower_bound = symbol.dimensions[0]
-    #             if lower_bound != 0:
-    #                 self.emit(f"pushi {lower_bound}")
-    #                 self.emit("sub")
-
-    #             self.emit("read")
-    #             if symbol.element_type == 'real':
-    #                 self.emit("atof")
-    #             else:
-    #                 self.emit("atoi")
-                
-    #             # Calcula endereço: base + deslocamento
-    #             self.emit(f"pushi {symbol.address}")
-    #             self.emit("add")  # offset + base
-    #             self.emit("store 0")  # store no endereço calculado
-
-    #         else:
-    #             print(f"[ERRO] _generate_readln: tipo inesperado {var_node.type}")
-
-
-
 
     def _generate_readln(self, node):
         for var_node in node.children:
@@ -455,9 +265,7 @@ class CodeGenerator:
                     print(f"[ERRO] _generate_readln: '{array_name}' não é um array válido")
                     continue
 
-
                 self.emit(f"pushst {symbol.address}")
-                print('quarto pushg')
                 self.emit(f"pushg {self.counter}")
                 self.emit(f"pushi 1")
                 self.emit("sub")
@@ -465,50 +273,8 @@ class CodeGenerator:
                 self.emit(f"atoi")
                 self.emit(f"storen")
 
-                # Apply lower bound adjustment
-                #lower_bound = symbol.dimensions[0]
-                #self.emit(f"pushg {symbol.address}")      # base
-                #self._generate_code(var_node.children[0]) # index
-                #if lower_bound != 0:
-                 #   self.emit(f"pushi {lower_bound}")
-                 #  self.emit("sub")
-                #self.emit("add")                          # final address
-
-                #self.emit("read")
-                #if symbol.element_type == 'real':
-                 #   self.emit("atof")
-                #else:
-                 #   self.emit("atoi")
-
-                #self.emit("store 0")   # address must be just under the value on the stack
-
             else:
                 print(f"[ERRO] _generate_readln: tipo inesperado {var_node.type}")
-
-
-    # ant 
-    # def _generate_array_access(self, node):
-    #         array_name = node.leaf
-    #         index_expr = node.children[0]
-
-    #         symbol = self.symtab.lookup(array_name)
-    #         if symbol is None or symbol.type != 'array':
-    #             print(f"[ERRO] _generate_array_access: '{array_name}' não é um array válido")
-    #             return
-
-    #         self._generate_code(index_expr)
-
-    #         # Subtrai o lower bound se não for zero
-    #         lower_bound = symbol.dimensions[0]
-    #         if lower_bound != 0:
-    #             self.emit(f"pushi {lower_bound}")
-    #             self.emit("sub")
-
-    #         # Adiciona ao endereço base do array
-    #         self.emit(f"pushi {symbol.address}")
-    #         self.emit("add")
-    #         self.emit("load 0")  # ← leitura indireta do endereço calculado
-
 
     def _generate_array_access(self, node):
         array_name = node.leaf
@@ -521,33 +287,12 @@ class CodeGenerator:
 
         # Push the base address (pointer stored in gp[symbol.address])
         self.emit(f"pushst {symbol.address}")
-        print('quinto pushg')
         self.emit(f"pushg {self.counter}")
         self.emit(f"pushi 1")
         self.emit("sub")
-        print('primeiro loadn')
         self.emit("loadn")
-        
         self._after_loadn = True
-
-        # Evaluate index expression
         self._generate_code(index_expr)
-
-
-        # Adjust index if lower bound != 0
-        #lower_bound = symbol.dimensions[0]
-        #if lower_bound != 0:
-         #   self.emit(f"pushi {lower_bound}")
-         #   self.emit("sub")
-
-        # Compute final address: base + index
-        #self.emit("add")
-
-        # Load the value at the computed address
-        #self.emit("load 0")
-
-
-
 
 
     def _new_label(self, base):

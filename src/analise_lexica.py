@@ -1,13 +1,13 @@
 import ply.lex as lex
 
-class PascalLexer:
+class Lexer:
     """
-    Analisador léxico para a linguagem Pascal Standard.
-    Converte o código fonte em uma sequência de tokens.
+    Analisador léxico. Divide o programa em tokens,
     """
 
-    # Lista de nomes de tokens (a ordem aqui não importa)
+    # Tokens
     tokens = [
+         # símbolos e operadores especiais 
         'ID',
         'INTEGER',
         'REAL',
@@ -33,7 +33,8 @@ class PascalLexer:
         'GE',
         'APOSTROPHE',
         'COMMENT',
-        # Palavras reservadas
+        
+        # palavras-reservadas 
         'AND', 'ARRAY', 'BEGIN', 'CASE', 'CONST', 'DIV', 'DO', 'DOWNTO', 'ELSE', 'END',
         'FILE', 'FOR', 'FUNCTION', 'GOTO', 'IF', 'IN', 'LABEL', 'MOD', 'NIL', 'NOT',
         'OF', 'OR', 'PACKED', 'PROCEDURE', 'PROGRAM', 'RECORD', 'REPEAT', 'SET',
@@ -42,7 +43,7 @@ class PascalLexer:
         'WRITELN', 'READLN', 'WRITE', 'READ', 'HALT'
     ]
 
-    # Expressões regulares para tokens simples
+    # Regexs 
     t_PLUS = r'\+'
     t_MINUS = r'-'
     t_TIMES = r'\*'
@@ -63,28 +64,6 @@ class PascalLexer:
     t_GE = r'>='
     t_APOSTROPHE = r'\''
 
-    # Operador de atribuição
-    def t_ASSIGN(self, t):
-        r':='
-        return t
-
-    # Números reais - deve vir antes de INTEGER
-    def t_REAL(self, t):
-        r'\d+\.\d+'
-        t.value = float(t.value)
-        return t
-
-    # Números inteiros
-    def t_INTEGER(self, t):
-        r'\d+'
-        t.value = int(t.value)
-        return t
-
-    # Strings
-    def t_STRING(self, t):
-        r"'[^']*'"
-        t.value = t.value[1:-1]  
-        return t
 
     def t_INTEGER_TYPE(self, t):
         r'\binteger\b'
@@ -277,40 +256,65 @@ class PascalLexer:
     def t_HALT(self, t):
         r'\bhalt\b'
         return t
-
-    # Identificadores normais - deve vir depois de todas as palavras reservadas
-    def t_ID(self, t):
-        r'[a-zA-Z][a-zA-Z0-9_]*'
+    
+    
+    
+    # ASSIGN 
+    def t_ASSIGN(self, t):
+        r':='
+        return t
+    
+    # STRING
+    def t_STRING(self, t):
+        r"'[^']*'"
+        t.value = t.value[1:-1]  
         return t
 
-    # Comentários
+
+    # REAL
+    def t_REAL(self, t):
+        r'\d+\.\d+'
+        t.value = float(t.value)
+        return t
+
+    # INTEGER
+    def t_INTEGER(self, t):
+        r'\d+'
+        t.value = int(t.value)
+        return t
+
+    # ID 
+    def t_ID(self, t):
+        r'[a-zA-Z][a-zA-Z0-9_]*' # começa por um caractere alfabetico 
+        return t
+
+    # Comentarios 
     def t_COMMENT(self, t):
         r'\{[^}]*\}|\(\*[\s\S]*?\*\)'
-        pass  # Ignorar comentários
+        pass 
 
-    # Ignorar espaços e tabs
     t_ignore = ' \t'
 
-    # Nova linha
     def t_newline(self, t):
         r'\n+'
         t.lexer.lineno += len(t.value)
 
-    # Tratamento de erros
     def t_error(self, t):
         print(f"Caractere ilegal '{t.value[0]}' na linha {t.lexer.lineno}")
         t.lexer.skip(1)
-
-    # Construção do lexer
+        
+        
+    # BUILD LEXER 
     def build(self, **kwargs):
         self.lexer = lex.lex(module=self, **kwargs)
         return self.lexer
 
-    # Reinicializar o lexer
+    # reset
     def reset(self):
         self.lexer.lineno = 1
 
-# Função para criar uma instância do lexer
+
+
 def create_lexer():
-    lexer = PascalLexer()
+    lexer = Lexer()
     return lexer.build()

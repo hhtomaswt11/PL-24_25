@@ -1,7 +1,5 @@
 import sys, shlex
 
-# python3 vm.py examples/vm/hello.vm
-
 class VirtualMachine:
     def __init__(self):
         self.stack = []
@@ -29,8 +27,6 @@ class VirtualMachine:
                 self.ip += 1
                 continue
 
-            #parts = shlex.split(line)
-            
             if line.strip().startswith("//") or line.strip() == "":
                 self.ip += 1
                 continue
@@ -60,7 +56,6 @@ class VirtualMachine:
                         return
                     addr = self.stack.pop()
                     self.stack.append(self.gp[addr])
-
 
                 case "add":
                     b, a = self.stack.pop(), self.stack.pop()
@@ -122,21 +117,6 @@ class VirtualMachine:
                 case "jump":
                     self.ip = self.labels[parts[1]]
                     continue
-                
-                
-                # case "store":
-                #     index = int(parts[1])
-                #     val = self.stack.pop()
-                #     addr = self.stack.pop()
-                #     # Só permitimos STORE index == 0 (como os professores especificam)
-                #     if index != 0:
-                #         print(f"STORE só suporta índice 0. Recebido: {index}")
-                #         self.running = False
-                #         return
-                #     self.gp[addr] = val
-
-
-
                 case "storen":
                     val = self.stack.pop()
                     index = self.stack.pop()
@@ -145,8 +125,6 @@ class VirtualMachine:
                     if final_addr >= len(self.gp):
                         self.gp.extend([0] * ((final_addr + 1) - len(self.gp)))  # Expande a memória se necessário
                     self.gp[final_addr] = val
-                    
-                
                 case "loadn":
                     index = self.stack.pop()
                     addr = self.stack.pop()
@@ -156,9 +134,6 @@ class VirtualMachine:
                         self.running = False
                         return
                     self.stack.append(self.gp[final_addr])
-
-
-
                 case "store":
                     index = int(parts[1])
                     val = self.stack.pop()
@@ -166,31 +141,21 @@ class VirtualMachine:
                     if addr + index >= len(self.gp):
                         self.gp.extend([0] * ((addr + index + 1) - len(self.gp)))  # Expande memória se necessário
                     self.gp[addr + index] = val
-
-                
                 case "stri":
                     val = self.stack.pop()
                     self.stack.append(str(val))  # converte int para string
-
                 case "strf":
                     val = self.stack.pop()
                     self.stack.append(f"{val:.2f}")  # converte float para string com 2 casas decimais
-                    
-                    
                 case "allocn": # NOVO
                     n = self.stack.pop()
                     addr = len(self.gp)
                     self.gp.extend([0] * n)
                     self.stack.append(addr)
-
-
                 case "pushst":
                     index = int(parts[1])
                     addr = self.gp[index]  # Este é o endereço da heap guardado em gp[index]
                     self.stack.append(addr)
-
-
-
                 case "jz":
                     label = parts[1]
                     val = self.stack.pop()
@@ -204,22 +169,20 @@ class VirtualMachine:
                         self.ip = self.labels[label]
                         continue
                 case "start":
-                    pass  # FP inicializado no web editor
+                    pass
                 case "stop":
                     self.running = False
                 case _:
                     print(f"Instrução desconhecida: {instr}")
                     self.running = False
-
             self.ip += 1
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Uso: python3 vm.py <ficheiro.vm>")
+        print("Comando correto: python3 vm.py <ficheiro.vm>")
         sys.exit(1)
     
     vm_file = sys.argv[1]
-
     with open(vm_file, "r") as f:
         code = [line.strip() for line in f.readlines()]
 
