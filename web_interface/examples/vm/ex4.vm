@@ -1,63 +1,59 @@
-pushi 5
-allocn
+pushi 0
 storeg 0
-pushst 0
-pushi 0
-store 0
-pushst 0
-pushi 0
-store 1
-pushst 0
-pushi 0
-store 2
-pushst 0
-pushi 0
-store 3
-pushst 0
-pushi 0
-store 4
 pushi 0
 storeg 1
 pushi 0
 storeg 2
-pushi 0
-storeg 3
 start
-pushi 0
-pushs "Introduza 5 números inteiros:"
+pushs "Introduza um número inteiro positivo:"
 writes
 writeln
-pushi 1
-storeg 1
-pushi 5
-storeg 3
-FOR1:
-pushg 1
-pushg 3
-sup
-not
-jz ENDFOR0
-pushst 0
-pushg 1
-pushi 1
-sub
 read
 atoi
-storen
-pushst 0
-pushg 1
+storeg 0
 pushi 1
-sub
-loadn
+storeg 2
+pushi 2
+storeg 1
+WHILE0:
+pushg 1
+pushg 0
+pushi 2
+div
+infeq
+pushg 2
+and
+jz ENDWHILE1
+pushg 0
+pushg 1
+mod
+pushi 0
+equal
+jz ELSE2
+pushi 0
+storeg 2
+jump ENDIF3
+ELSE2:
+ENDIF3:
 pushg 1
 pushi 1
 add
 storeg 1
-jump FOR1
-ENDFOR0:
-pushs "A soma dos números é: "
-writes
-pushi 0
+jump WHILE0
+ENDWHILE1:
+pushg 2
+jz ELSE4
+pushg 0
 writei
+pushs " é um número primo"
+writes
 writeln
+jump ENDIF5
+ELSE4:
+pushg 0
+writei
+pushs " não é um número primo"
+writes
+writeln
+ENDIF5:
 stop

@@ -11,11 +11,30 @@ writeln
 read
 atoi
 storeg 0
+pushg 0
+pushi 0
+inf
+jz ELSE0
+pushs "Não existem números primos negativos."
+writes
+writeln
+stop
+jump ENDIF1
+ELSE0:
+ENDIF1:
+pushg 0
+pushi 2
+inf
+jz ELSE2
+pushi 0
+storeg 2
+jump ENDIF3
+ELSE2:
 pushi 1
 storeg 2
 pushi 2
 storeg 1
-WHILE0:
+WHILE4:
 pushg 1
 pushg 0
 pushi 2
@@ -23,37 +42,38 @@ div
 infeq
 pushg 2
 and
-jz ENDWHILE1
+jz ENDWHILE5
 pushg 0
 pushg 1
 mod
 pushi 0
 equal
-jz ELSE2
+jz ELSE6
 pushi 0
 storeg 2
-jump ENDIF3
-ELSE2:
-ENDIF3:
+jump ENDIF7
+ELSE6:
+ENDIF7:
 pushg 1
 pushi 1
 add
 storeg 1
-jump WHILE0
-ENDWHILE1:
+jump WHILE4
+ENDWHILE5:
+ENDIF3:
 pushg 2
-jz ELSE4
+jz ELSE8
 pushg 0
 writei
 pushs " é um número primo"
 writes
 writeln
-jump ENDIF5
-ELSE4:
+jump ENDIF9
+ELSE8:
 pushg 0
 writei
 pushs " não é um número primo"
 writes
 writeln
-ENDIF5:
+ENDIF9:
 stop
