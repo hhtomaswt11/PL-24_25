@@ -7,41 +7,50 @@ storeg 2
 pushi 0
 storeg 3
 start
-pushs "Introduza um número inteiro positivo:"
-writes
-writeln
+pushs "Introduza o primeiro número: "
 read
 atoi
 storeg 0
-pushi 1
-storeg 2
-pushi 1
+pushs "Introduza o segundo número: "
+read
+atoi
 storeg 1
+pushs "Introduza o terceiro número: "
+read
+atoi
+storeg 2
+pushg 0
+pushg 1
+sup
+jz ELSE0
+pushg 0
+pushg 2
+sup
+jz ELSE2
 pushg 0
 storeg 3
-FOR1:
+jump ENDIF3
+ELSE2:
+pushg 2
+storeg 3
+ENDIF3:
+jump ENDIF1
+ELSE0:
 pushg 1
-pushg 3
+pushg 2
 sup
-not
-jz ENDFOR0
-pushg 2
+jz ELSE4
 pushg 1
-mul
-storeg 2
-pushg 1
-pushi 1
-add
-storeg 1
-jump FOR1
-ENDFOR0:
-pushs "Fatorial de "
-writes
-pushg 0
-writei
-pushs ": "
-writes
+storeg 3
+jump ENDIF5
+ELSE4:
 pushg 2
+storeg 3
+ENDIF5:
+ENDIF1:
+pushs "O maior é: "
+writes
+pushg 3
 writei
 writeln
 stop

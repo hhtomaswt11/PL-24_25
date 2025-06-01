@@ -1,4 +1,4 @@
-rogram SomaArray;
+program SomaArray;
 var
 numeros: array[1..5] of integer;
 i, soma: integer;

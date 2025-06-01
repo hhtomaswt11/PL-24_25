@@ -138,6 +138,10 @@ class SemanticAnalyzer:
     def _analyze_writeln(self, node):
         if node.children:
             self._analyze_node(node.children[0])
+            
+    def _analyze_write(self, node): # NOVO 
+        if node.children:
+            self._analyze_node(node.children[0])
 
     def _analyze_readln(self, node):
         for var_node in node.children:
