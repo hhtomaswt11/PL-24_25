@@ -246,6 +246,20 @@ class CodeGenerator:
                     else:
                         self.emit("writei")
         self.emit("writeln")
+        
+    def _generate_write(self, node):
+        if node.children:
+            for expr in node.children[0].children:
+                if expr.type == 'formatted_output':
+                    self._generate_code(expr)  # já inclui writef ou writei
+                else:
+                    self._generate_code(expr)
+                    if expr.type == 'string':
+                        self.emit("writes")
+                    elif expr.type == 'real':
+                        self.emit("writef")  # ← opcional se tiveres float direto
+                    else:
+                        self.emit("writei")
 
     def _generate_readln(self, node):
         for var_node in node.children:

@@ -1,6 +1,7 @@
 import sys, os
 from src.analise_sintatica import create_parser
 from src.analise_semantica import SemanticAnalyzer
+from src.otimizar_AST import collect_used_variables, prune_unused_var_declarations
 from src.codegen import CodeGenerator
 from vm import VirtualMachine
 from colorama import init
@@ -13,6 +14,9 @@ def main(pascal_file):
     # Análise sintática
     parser = create_parser()
     ast = parser.parse(source_code)
+    
+    used_vars = collect_used_variables(ast)
+    prune_unused_var_declarations(ast, used_vars)
 
     if parser.errors:
         print("Erros de parsing:")
