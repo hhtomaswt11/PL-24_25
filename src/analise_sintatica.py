@@ -179,29 +179,6 @@ class Parser:
         direction = 'to' if p[5] == 'to' else 'downto'
         p[0] = Node('for', [Node('id', leaf=p[2]), p[4], p[6], p[8]], direction)
     
-    # Regra para chamada de procedimento
-    # def p_procedure_call_statement(self, p):
-    #     '''procedure_call_statement : ID LPAREN expression_list RPAREN
-    #                                | ID LPAREN RPAREN
-    #                                | WRITELN LPAREN expression_list RPAREN
-    #                                | WRITELN LPAREN RPAREN
-    #                                | READLN LPAREN variable RPAREN
-    #                                | READLN LPAREN RPAREN'''
-    #     if p[1].lower() in ('writeln', 'readln'):
-    #         if len(p) > 4:
-    #             if p[1].lower() == 'writeln':
-    #                 p[0] = Node('writeln', [p[3]])
-    #             else:  # readln
-    #                 p[0] = Node('readln', [p[3]])
-    #         else:
-    #             p[0] = Node(p[1].lower(), [])
-    #     else:
-    #         if len(p) > 4:
-    #             p[0] = Node('procedure_call', [Node('id', leaf=p[1]), p[3]])
-    #         else:
-    #             p[0] = Node('procedure_call', [Node('id', leaf=p[1])])
-    
-    
     
     def p_procedure_call_statement(self, p):
         '''procedure_call_statement : ID LPAREN expression_list RPAREN
