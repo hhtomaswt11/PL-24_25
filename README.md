@@ -2,9 +2,9 @@
 
 (Ano letivo 2024/2025)
 
-##### Avaliação Final: 
+##### Avaliação Final: 16/20 ★
 
-#### Projeto: Compilador Pascal Standard ★
+#### Projeto: Compilador Pascal Standard 
 
 Este projeto foi desenvolvido no âmbito da unidade curricular de **Processamento de Linguagens**, no 2.º semestre do 3.º ano da licenciatura em Engenharia Informática, por:
 
